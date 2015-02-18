@@ -27,7 +27,8 @@
 #define S_GR_TORIGHT        9
 #define S_GR_RELOAD        10
 #define S_DUNK             11
-unsigned word state = S_START; // Global
+
+unsigned int state = S_START; // Global
 
 
 /* Timers */
@@ -39,7 +40,7 @@ unsigned word state = S_START; // Global
 #define SIDE_UNKNOWN     0
 #define SIDE_LEFT        1
 #define SIDE_RIGHT       2
-unsigned word start_arena_side = SIDE_UNKNOWN;
+unsigned int start_arena_side = SIDE_UNKNOWN;
 
 
 /*---------------- Module Function Prototypes ---------------*/
@@ -49,12 +50,12 @@ void setup() {  // setup() function required for Arduino
   Serial.begin(9600);
   Serial.println("Skip to my loop!");
 
-  TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL;
+  TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
 }
 
 void loop() {  // loop() function required for Arduino
-  if (isTimerExpired(T_DEBUG)) timedDebug();
+  if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
   
   switch (state) {
     case S_START:
@@ -129,7 +130,7 @@ void setState (unsigned int newState) {
 void timedDebug(void) {
   static int Time = 0;
 
-  TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL;
+  TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
   Serial.print(" time:");
   Serial.print(++Time);
