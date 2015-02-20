@@ -26,7 +26,7 @@ unsigned char isLeftSensorOnTape() {
 
 	sensorVal = analogRead(PIN_LEFT_TAPESENSOR);
 
-	result = (sensorVal > TAPE_SENSOR_THRESHOLD) ? true : false;
+	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;
@@ -41,7 +41,7 @@ unsigned char isRightSensorOnTape() {
 
 	sensorVal = analogRead(PIN_RIGHT_TAPESENSOR);
 
-	result = (sensorVal > TAPE_SENSOR_THRESHOLD) ? true : false;
+	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;

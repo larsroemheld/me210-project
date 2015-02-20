@@ -14,11 +14,11 @@
 
 #include "Arduino.h"
 
-#define MAX_ANALOG_READ 1023
-
 
 #define PIN_LEFT_TAPESENSOR   A1
 #define PIN_RIGHT_TAPESENSOR  A2
+
+#define MAX_ANALOG_READ 1023
 
 #define TAPE_SENSOR_THRESHOLD 500
 

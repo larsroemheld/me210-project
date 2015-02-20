@@ -69,6 +69,10 @@ void setup() {  // setup() function required for Arduino
   Serial.begin(9600);
   Serial.println("Skip to my loop!");
 
+  initBumpers();
+  initMotors();
+  initTapeSensors();
+
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
   setState(S_START);  
 }
@@ -161,12 +165,19 @@ void setState (unsigned int newState) {
       setLeftMotorSpeed(MAX_MOTOR_SPEED);
       setRightMotorSpeed(MAX_MOTOR_SPEED * 4 / 5);
     case S_GR_REV:
+      setMotorSpeed(-MAX_MOTOR_SPEED);
       break;
     case S_GR_TOLEFT:
+      setLeftMotorSpeed(- MAX_MOTOR_SPEED * 4 / 5);
+      setRightMotorSpeed(- MAX_MOTOR_SPEED);
       break;
     case S_GR_TORIGHT:
+      setLeftMotorSpeed(- MAX_MOTOR_SPEED);
+      setRightMotorSpeed(- MAX_MOTOR_SPEED * 4 / 5);
       break;
     case S_GR_RELOAD:
+      requestBalls(3);
+      setState(S_GF_FWD);
       break;
     case S_DUNK:
       Serial.println("DUNK!");
