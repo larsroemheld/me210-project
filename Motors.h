@@ -9,8 +9,8 @@
 
 **************************************************************/
 
-#ifndef MOTORS_H
-#define MOTORS_H
+#ifndef H_MOTORS
+#define H_MOTORS
 
 #define NULL_VALUE -10000 // used as threshold for non-setting function calls
 #define MAX_MOTOR_SPEED 254

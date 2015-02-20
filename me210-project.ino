@@ -25,7 +25,7 @@
 
 /* State Machine. Prefix S_, middle abbreviation for functional component */ 
 #define S_START             0
-// Find Line
+// Find line
 #define S_FL_GETFIRSTBALLS  1
 #define S_FL_FWDSEARCH      2
 #define S_FL_TURNONLINE     3
@@ -40,7 +40,8 @@
 #define S_GR_RELOAD        10
 #define S_DUNK             11
 
-unsigned char state = S_START; // Global
+// NEVER WRITE TO THIS VARIABLE DIRECTLY, ALWAYS USE setState()!
+unsigned char state = S_START; // Global;
 
 
 /* Timers */

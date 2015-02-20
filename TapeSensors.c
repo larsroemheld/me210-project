@@ -19,11 +19,35 @@ void initTapeSensors() {
 
 // TODO: Threshold values, hysteresis (testing)
 unsigned char isLeftSensorOnTape() {
+	static unsigned char lastReadingOnTape = false;
+	static unsigned int lastReadingVal = 0;
 
+	unsigned int sensorVal; unsigned char result;
+
+	sensorVal = analogRead(PIN_LEFT_TAPESENSOR);
+
+	result = (sensorVal > TAPE_SENSOR_THRESHOLD) ? true : false;
+
+	lastReadingVal = sensorVal;
+	lastReadingOnTape = result;
+	return result;
 }
+
 unsigned char isRightSensorOnTape() {
+	static unsigned char lastReadingOnTape = false;
+	static unsigned int lastReadingVal = 0;
 
+	unsigned int sensorVal; unsigned char result;
+
+	sensorVal = analogRead(PIN_RIGHT_TAPESENSOR);
+
+	result = (sensorVal > TAPE_SENSOR_THRESHOLD) ? true : false;
+
+	lastReadingVal = sensorVal;
+	lastReadingOnTape = result;
+	return result;
 }
+
 unsigned char areBothSensorsOnTape() {
 	return isLeftSensorOnTape() && isRightSensorOnTape();
 }
