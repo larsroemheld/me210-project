@@ -12,9 +12,10 @@
 #ifndef H_MOTORS
 #define H_MOTORS
 
+#include "Arduino.h"
+
 #define NULL_VALUE -10000 // used as threshold for non-setting function calls
 #define MAX_MOTOR_SPEED 254
-
 
 #define PIN_LEFT_MOTOR 0 
 #define PIN_RIGHT_MOTOR 1

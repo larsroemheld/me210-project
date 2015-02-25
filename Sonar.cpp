@@ -1,5 +1,5 @@
 /**************************************************************
-  File:      Sonar.c
+  File:      Sonar.cpp
   Contents:  ME210 Project -- Team && 0x01 
   Authors:   Lars Roemheld, Benjamin Galligan, Ravi Haksar, Dongsuk Shin
   Notes:    Read sonar sensors
@@ -11,6 +11,18 @@
 
 **************************************************************/
 
+#include "Sonar.h"
 
-     
 
+void initSonar() {
+//	NewPing Sonar_LeftSonar(PIN_LEFT_SONAR_TRIGGER, PIN_LEFT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
+}
+
+unsigned char getSonarLeftDistanceInCM(unsigned char numPings) {
+	unsigned int medianSonarMicroSeconds, medianSonarCM;
+
+//	medianSonarMicroSeconds = Sonar_LeftSonar.ping_median(numPings);
+//	medianSonarCM = Sonar_LeftSonar.convert_cm(medianSonarMicroSeconds);
+
+	return medianSonarCM;
+}

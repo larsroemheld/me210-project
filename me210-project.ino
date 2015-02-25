@@ -12,13 +12,16 @@
 /*---------------- Includes ---------------------------------*/
 // ME210 Timers included for timing
 #include "Timers.h"
-// TODO including headers produced strange errors. . . Fixed for now by (nastily) including the module itself.
+
 // Our motor module
-#include "Motors.c"
+#include "Motors.h"
 // Our bumber module
-#include "Bumpers.c"
+#include "Bumpers.h"
 // Our tape sensor module
-#include "TapeSensors.c"
+#include "TapeSensors.h"
+// Our sonar sensor module
+#include "Sonar.h"
+
 
 
 /*---------------- Module Defines ---------------------------*/
