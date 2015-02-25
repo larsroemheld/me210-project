@@ -17,8 +17,10 @@
 #define NULL_VALUE -10000 // used as threshold for non-setting function calls
 #define MAX_MOTOR_SPEED 254
 
-#define PIN_LEFT_MOTOR 0 
-#define PIN_RIGHT_MOTOR 1
+#define PIN_RIGHT_MOTOR_SPEED 10 
+#define PIN_RIGHT_MOTOR_DIR   11
+#define PIN_LEFT_MOTOR_SPEED  12
+#define PIN_LEFT_MOTOR_DIR    13
 
 
 void initMotors();

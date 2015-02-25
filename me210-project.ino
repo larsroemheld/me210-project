@@ -75,6 +75,7 @@ void setup() {  // setup() function required for Arduino
   initBumpers();
   initMotors();
   initTapeSensors();
+//  initSonar();
 
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
   setState(S_START);  
@@ -87,9 +88,7 @@ void loop() {  // loop() function required for Arduino
     case S_START:
       int startDistanceToLeft;
       // Send 5 pings, average distance
-      // SendPing(ultrasonic)
-      // WaitForResponse(ultrasonic)
-      startDistanceToLeft = 0;
+      startDistanceToLeft = getSonarLeftDistanceInInches(5);
       
       // TODO: test what if we happen to start right on the line
       startArenaSide = (startDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;

@@ -13,16 +13,19 @@
 
 #include "Sonar.h"
 
+// module-wide object; needed to be global so all internal functions work with this
+// object without coupling the sensor to other parts of code
+static NewPing Sonar_LeftSonar(PIN_LEFT_SONAR_TRIGGER, PIN_LEFT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
 
-void initSonar() {
-//	NewPing Sonar_LeftSonar(PIN_LEFT_SONAR_TRIGGER, PIN_LEFT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
+void initSonar(void) {
+  // None, since object is initialized globally
 }
 
-unsigned char getSonarLeftDistanceInCM(unsigned char numPings) {
+unsigned char getSonarLeftDistanceInInches(unsigned char numPings) {
 	unsigned int medianSonarMicroSeconds, medianSonarCM;
 
-//	medianSonarMicroSeconds = Sonar_LeftSonar.ping_median(numPings);
-//	medianSonarCM = Sonar_LeftSonar.convert_cm(medianSonarMicroSeconds);
+	medianSonarMicroSeconds = Sonar_LeftSonar.ping_median(numPings);
+	medianSonarCM = Sonar_LeftSonar.convert_in(medianSonarMicroSeconds);
 
 	return medianSonarCM;
 }

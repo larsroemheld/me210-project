@@ -12,8 +12,8 @@
 **************************************************************/
 
 
-#ifndef H_BUMPERS
-#define H_BUMPERS
+#ifndef H_SONAR
+#define H_SONAR
 
 #include "NewPing.h"
 
@@ -23,12 +23,8 @@
 // Maximum range to be sensed by sonar in cm
 #define MAX_SONAR_RANGE_CM     200
 
-// Global object; needed to be global so all internal functions work with this
-// object without coupling the sensor to other parts of code
-NewPing Sonar_LeftSonar(PIN_LEFT_SONAR_TRIGGER, PIN_LEFT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
-
 void initSonar();
 
-unsigned char getSonarLeftDistanceInCM(unsigned char numPings);
+unsigned char getSonarLeftDistanceInInches(unsigned char numPings);
 
 #endif

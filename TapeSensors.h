@@ -15,8 +15,8 @@
 #include "Arduino.h"
 
 
-#define PIN_LEFT_TAPESENSOR   A1
-#define PIN_RIGHT_TAPESENSOR  A2
+#define PIN_LEFT_TAPESENSOR   A0
+#define PIN_RIGHT_TAPESENSOR  A1
 
 #define MAX_ANALOG_READ 1023
 
