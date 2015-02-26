@@ -15,10 +15,10 @@
 #include "Arduino.h"
 
 
-#define PIN_LEFT_BACKBUMPER   0
-#define PIN_RIGHT_BACKBUMPER  1
+#define PIN_LEFT_BACKBUMPER   2
+#define PIN_RIGHT_BACKBUMPER  2
 #define PIN_LEFT_FRONTBUMPER  2
-#define PIN_RIGHT_FRONTBUMPER 3
+#define PIN_RIGHT_FRONTBUMPER 2
 
 
 void initBumpers();

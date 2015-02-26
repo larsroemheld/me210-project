@@ -44,7 +44,7 @@
 #define S_DUNK             11
 
 // NEVER WRITE TO THIS VARIABLE DIRECTLY, ALWAYS USE setState()!
-unsigned char state = S_START; // Global;
+unsigned char state = S_FL_FWDSEARCH; // Global;
 
 
 /* Timers */
@@ -58,10 +58,9 @@ unsigned char state = S_START; // Global;
 #define SIDE_RIGHT       2
 unsigned char startArenaSide = SIDE_UNKNOWN;
 
-
 /* Sensor parameters and thresholds */
 #define HALF_FIELD_WIDTH 24 // Half the field width, used as threshold for ultrasonic side sensing on startup
-
+#define SONAR_START_ACCURACY_PINGS 20 // How many sonar pings we send off and average over when we start the game
 
 
 
@@ -78,17 +77,17 @@ void setup() {  // setup() function required for Arduino
 //  initSonar();
 
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
-  setState(S_START);  
+  setState(state);  
 }
 
 void loop() {  // loop() function required for Arduino
-  if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
+ if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
   
   switch (state) {
     case S_START:
       int startDistanceToLeft;
-      // Send 5 pings, average distance
-      startDistanceToLeft = getSonarLeftDistanceInInches(5);
+      // Send SONAR_START_ACCURACY_PINGS pings, average distance
+      startDistanceToLeft = getSonarLeftDistanceInInches(SONAR_START_ACCURACY_PINGS);
       
       // TODO: test what if we happen to start right on the line
       startArenaSide = (startDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
@@ -98,7 +97,7 @@ void loop() {  // loop() function required for Arduino
       Serial.println("WARNING: State machine was in S_FL_GETFIRSTBALLS, but this should always be a transient state!");
       break;
     case S_FL_FWDSEARCH:
-      if (areBothSensorsOnTape()) setState(S_FL_TURNONLINE);
+//      if (areBothSensorsOnTape()) setState(S_FL_TURNONLINE);
       break;
     case S_FL_TURNONLINE:
       Serial.println("WARNING: State machine was in S_FL_TURNONLINE, but this should always be a transient state!");
@@ -106,7 +105,7 @@ void loop() {  // loop() function required for Arduino
     case S_GF_FWD:
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (!isLeftSensorOnTape()) setState(S_GF_TORIGHT);
-      if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
+//      if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
       break;
     case S_GF_TOLEFT:
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
@@ -117,10 +116,17 @@ void loop() {  // loop() function required for Arduino
       if (areBothSensorsOnTape()) setState(S_GF_FWD);
       break;
     case S_GR_REV:
+      if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
+      if (!isLeftSensorOnTape()) setState(S_GR_TORIGHT);
+      if (!isRightSensorOnTape()) setState(S_GR_TOLEFT);
       break;
     case S_GR_TOLEFT:
+      if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
+      if (areBothSensorsOnTape()) setState(S_GR_REV);
       break;
     case S_GR_TORIGHT:
+      if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
+      if (areBothSensorsOnTape()) setState(S_GR_REV);
       break;
     case S_GR_RELOAD:
       break;
@@ -132,6 +138,10 @@ void loop() {  // loop() function required for Arduino
 
 /*------------------ State Machine Functions -------------*/
 void setState (unsigned int newState) {
+  state = newState;
+  Serial.print("State change: ");
+  Serial.println(newState);
+
   signed int arenaTurnSign;
   
   switch (newState) {
@@ -182,14 +192,13 @@ void setState (unsigned int newState) {
       setState(S_GF_FWD);
       break;
     case S_DUNK:
-      Serial.println("DUNK!");
+      dunkBalls();
+      setState(S_GR_REV);
       break;
     default: 
       Serial.println("Invalid state requested: ");
       Serial.println(newState);
   }
-
-  state = newState;
 }
 
 
@@ -240,19 +249,34 @@ void turnRightInPlace(unsigned int milliSecs, signed int turnSpeed) {
   setRightMotorSpeed(oldRightSpeed);
 }
 
+void dunkBalls() {
+  Serial.println("DUNK!");
+}
 
 /*---------------- Module Functions -------------------------*/
 
 
 void timedDebug(void) {
   static int Time = 0;
-
+  int temp;
+  
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
   Serial.print(" time:");
   Serial.print(++Time);
-  Serial.print(" state:");
-  Serial.println(state,DEC);
+  // Serial.print(" state:");
+  // Serial.println(state,DEC);
+  // temp = isLeftSensorOnTape();
+  // Serial.print(" left tape:");
+  // Serial.println(temp);
+
+ Serial.print(" left/right:");
+// Serial.println(analogRead(PIN_LEFT_TAPESENSOR));
+ Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
+
+ // Serial.print(" sonar:");
+ // Serial.println(debugSonar());
+
 }
 
 

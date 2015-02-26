@@ -21,11 +21,15 @@ void initSonar(void) {
   // None, since object is initialized globally
 }
 
+int debugSonar(void) {
+  return Sonar_LeftSonar.convert_in(Sonar_LeftSonar.ping_median(10));
+}  
+
 unsigned char getSonarLeftDistanceInInches(unsigned char numPings) {
-	unsigned int medianSonarMicroSeconds, medianSonarCM;
+	unsigned int medianSonarMicroSeconds, medianSonarIn;
 
 	medianSonarMicroSeconds = Sonar_LeftSonar.ping_median(numPings);
-	medianSonarCM = Sonar_LeftSonar.convert_in(medianSonarMicroSeconds);
+	medianSonarIn = Sonar_LeftSonar.convert_in(medianSonarMicroSeconds);
 
-	return medianSonarCM;
+	return medianSonarIn;
 }

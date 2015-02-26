@@ -25,7 +25,10 @@ unsigned char isLeftSensorOnTape() {
 	unsigned int sensorVal; unsigned char result;
 
 	sensorVal = analogRead(PIN_LEFT_TAPESENSOR);
+        Serial.println("LeftSensor Reading:");
+        Serial.println(sensorVal);
 
+        
 	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
 
 	lastReadingVal = sensorVal;
@@ -40,6 +43,8 @@ unsigned char isRightSensorOnTape() {
 	unsigned int sensorVal; unsigned char result;
 
 	sensorVal = analogRead(PIN_RIGHT_TAPESENSOR);
+        Serial.println("RightSensor Reading:");
+        Serial.println(sensorVal);
 
 	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
 

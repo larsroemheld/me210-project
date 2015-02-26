@@ -21,6 +21,7 @@ void initMotors() {
 // TODO: how do we handle 2 directions? DIR pin or DC polarity?
 signed int setLeftMotorSpeed(signed int newSpeed) {
 	static signed int leftSpeed = 0;
+        newSpeed = -newSpeed;
 
 	int oldSpeed;
 	oldSpeed = leftSpeed;
