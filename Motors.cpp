@@ -30,7 +30,7 @@ signed int setLeftMotorSpeed(signed int newSpeed) {
 
 		// Set arduino motor outputs to value
 		analogWrite(PIN_LEFT_MOTOR_SPEED, (byte) abs(newSpeed));
-		digitalWrite(PIN_LEFT_MOTOR_DIR, (newSpeed > 0) ? HIGH : LOW);
+		digitalWrite(PIN_LEFT_MOTOR_DIR, (newSpeed >= 0) ? HIGH : LOW);
 	}
 	return oldSpeed;
 }
@@ -47,7 +47,7 @@ signed int setRightMotorSpeed(signed int newSpeed) {
 
 		// Set arduino motor outputs to value
 		analogWrite(PIN_RIGHT_MOTOR_SPEED, (byte) abs(newSpeed));
-		digitalWrite(PIN_RIGHT_MOTOR_DIR, (newSpeed > 0) ? HIGH : LOW);
+		digitalWrite(PIN_RIGHT_MOTOR_DIR, (newSpeed >= 0) ? HIGH : LOW);
 	}
 	return oldSpeed;
 }

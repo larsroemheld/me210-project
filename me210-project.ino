@@ -50,7 +50,8 @@ unsigned char state = S_FL_FWDSEARCH; // Global;
 /* Timers */
 #define T_DEBUG              0
 #define T_DEBUG_INTERVAL  1000
-
+#define T_GAME
+#define T_GAME_LENGTH     120*1000
 
 /* Which side of the center line are we on? */
 #define SIDE_UNKNOWN     0
@@ -97,7 +98,7 @@ void loop() {  // loop() function required for Arduino
       Serial.println("WARNING: State machine was in S_FL_GETFIRSTBALLS, but this should always be a transient state!");
       break;
     case S_FL_FWDSEARCH:
-//      if (areBothSensorsOnTape()) setState(S_FL_TURNONLINE);
+      if (areBothSensorsOnTape()) setState(S_FL_TURNONLINE);
       break;
     case S_FL_TURNONLINE:
       Serial.println("WARNING: State machine was in S_FL_TURNONLINE, but this should always be a transient state!");
@@ -105,7 +106,7 @@ void loop() {  // loop() function required for Arduino
     case S_GF_FWD:
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (!isLeftSensorOnTape()) setState(S_GF_TORIGHT);
-//      if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
+      if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
       break;
     case S_GF_TOLEFT:
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
@@ -170,12 +171,14 @@ void setState (unsigned int newState) {
       setMotorSpeed(MAX_MOTOR_SPEED);
       break;
     case S_GF_TOLEFT:
-      setLeftMotorSpeed(MAX_MOTOR_SPEED * 4 / 5);
+      setLeftMotorSpeed(0);
       setRightMotorSpeed(MAX_MOTOR_SPEED);
       break;
     case S_GF_TORIGHT:
       setLeftMotorSpeed(MAX_MOTOR_SPEED);
-      setRightMotorSpeed(MAX_MOTOR_SPEED * 4 / 5);
+      setRightMotorSpeed(0);
+      break;
+      
     case S_GR_REV:
       setMotorSpeed(-MAX_MOTOR_SPEED);
       break;
@@ -271,7 +274,7 @@ void timedDebug(void) {
   // Serial.println(temp);
 
  Serial.print(" left/right:");
-// Serial.println(analogRead(PIN_LEFT_TAPESENSOR));
+ Serial.println(analogRead(PIN_LEFT_TAPESENSOR));
  Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
 
  // Serial.print(" sonar:");
