@@ -44,7 +44,7 @@
 #define S_DUNK             11
 
 // NEVER WRITE TO THIS VARIABLE DIRECTLY, ALWAYS USE setState()!
-unsigned char state = S_FL_FWDSEARCH; // Global;
+unsigned char state = S_GF_FWD; // Global;
 
 
 /* Timers */
@@ -63,7 +63,7 @@ unsigned char startArenaSide = SIDE_UNKNOWN;
 #define HALF_FIELD_WIDTH 24 // Half the field width, used as threshold for ultrasonic side sensing on startup
 #define SONAR_START_ACCURACY_PINGS 20 // How many sonar pings we send off and average over when we start the game
 
-
+int temp_debug = true;
 
 /*---------------- Module Function Prototypes ---------------*/
 
@@ -82,8 +82,21 @@ void setup() {  // setup() function required for Arduino
 }
 
 void loop() {  // loop() function required for Arduino
- if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
+  if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
   
+  if(Serial.available() || temp_debug == true) {
+    temp_debug = false;
+    Serial.println("STOPPED");
+    setMotorSpeed(0);
+    unsigned char c;
+    c = Serial.read();
+    while (!Serial.available()) { delay(100); }
+    c = Serial.read();
+    Serial.println("CONTINUED");
+    setState(S_GF_FWD);
+  }
+
+
   switch (state) {
     case S_START:
       int startDistanceToLeft;
@@ -92,6 +105,9 @@ void loop() {  // loop() function required for Arduino
       
       // TODO: test what if we happen to start right on the line
       startArenaSide = (startDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
+
+      // DEBUG
+      startArenaSide = SIDE_RIGHT;
       setState(S_FL_GETFIRSTBALLS);
       break;
     case S_FL_GETFIRSTBALLS:
@@ -163,7 +179,7 @@ void setState (unsigned int newState) {
     case S_FL_TURNONLINE:
       arenaTurnSign = (startArenaSide == SIDE_LEFT) ? 1 : -1;
       
-      turnRightInPlace(200, - arenaTurnSign * MAX_MOTOR_SPEED / 2);
+      turnRightInPlace(500, - arenaTurnSign * MAX_MOTOR_SPEED / 2);
 
       setState(S_GF_FWD);
       break;
@@ -171,24 +187,24 @@ void setState (unsigned int newState) {
       setMotorSpeed(MAX_MOTOR_SPEED);
       break;
     case S_GF_TOLEFT:
-      setLeftMotorSpeed(0);
+      setLeftMotorSpeed(MAX_MOTOR_SPEED * 3 / 5);
       setRightMotorSpeed(MAX_MOTOR_SPEED);
       break;
     case S_GF_TORIGHT:
       setLeftMotorSpeed(MAX_MOTOR_SPEED);
-      setRightMotorSpeed(0);
+      setRightMotorSpeed(MAX_MOTOR_SPEED * 3 / 5);
       break;
       
     case S_GR_REV:
       setMotorSpeed(-MAX_MOTOR_SPEED);
       break;
     case S_GR_TOLEFT:
-      setLeftMotorSpeed(- MAX_MOTOR_SPEED * 4 / 5);
+      setLeftMotorSpeed(- MAX_MOTOR_SPEED * 3 / 5);
       setRightMotorSpeed(- MAX_MOTOR_SPEED);
       break;
     case S_GR_TORIGHT:
       setLeftMotorSpeed(- MAX_MOTOR_SPEED);
-      setRightMotorSpeed(- MAX_MOTOR_SPEED * 4 / 5);
+      setRightMotorSpeed(- MAX_MOTOR_SPEED * 3 / 5);
       break;
     case S_GR_RELOAD:
       requestBalls(3);
@@ -267,11 +283,8 @@ void timedDebug(void) {
 
   Serial.print(" time:");
   Serial.print(++Time);
-  // Serial.print(" state:");
-  // Serial.println(state,DEC);
-  // temp = isLeftSensorOnTape();
-  // Serial.print(" left tape:");
-  // Serial.println(temp);
+  Serial.print(" state:");
+  Serial.println(state,DEC);
 
  Serial.print(" left/right:");
  Serial.println(analogRead(PIN_LEFT_TAPESENSOR));

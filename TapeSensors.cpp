@@ -29,7 +29,7 @@ unsigned char isLeftSensorOnTape() {
         //Serial.println(sensorVal);
 
         
-	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
+	result = (sensorVal > TAPE_SENSOR_THRESHOLD_LEFT) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;
@@ -46,7 +46,7 @@ unsigned char isRightSensorOnTape() {
         //Serial.println("RightSensor Reading:");
         //Serial.println(sensorVal);
 
-	result = (sensorVal < TAPE_SENSOR_THRESHOLD) ? true : false;
+	result = (sensorVal > TAPE_SENSOR_THRESHOLD_RIGHT) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;
