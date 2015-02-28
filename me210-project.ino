@@ -49,7 +49,7 @@ unsigned char state = S_GF_FWD; // Global;
 
 /* Timers */
 #define T_DEBUG              0
-#define T_DEBUG_INTERVAL  1000
+#define T_DEBUG_INTERVAL  200
 #define T_GAME
 #define T_GAME_LENGTH     120*1000
 
@@ -106,8 +106,6 @@ void loop() {  // loop() function required for Arduino
       // TODO: test what if we happen to start right on the line
       startArenaSide = (startDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
 
-      // DEBUG
-      startArenaSide = SIDE_RIGHT;
       setState(S_FL_GETFIRSTBALLS);
       break;
     case S_FL_GETFIRSTBALLS:
@@ -120,16 +118,16 @@ void loop() {  // loop() function required for Arduino
       Serial.println("WARNING: State machine was in S_FL_TURNONLINE, but this should always be a transient state!");
       break;
     case S_GF_FWD:
-      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (!isLeftSensorOnTape()) setState(S_GF_TORIGHT);
       if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
       break;
     case S_GF_TOLEFT:
-      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (areBothSensorsOnTape()) setState(S_GF_FWD);
       break;
     case S_GF_TORIGHT:
-      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (areBothSensorsOnTape()) setState(S_GF_FWD);
       break;
     case S_GR_REV:
@@ -232,8 +230,8 @@ void requestBalls(char numBalls) {
 
   for (int iBall = 1; iBall <= numBalls; iBall++) {
     // Make sure we hit the bumper
+    setMotorSpeed(-MAX_MOTOR_SPEED);
     while (!isAnyBackBumperPressed()) {
-      setMotorSpeed(-MAX_MOTOR_SPEED);
       delay(20);
     }
 
@@ -243,9 +241,8 @@ void requestBalls(char numBalls) {
     delay(500);
 
     // Release the bumper
+    setMotorSpeed(MAX_MOTOR_SPEED);
     while (isAnyBackBumperPressed()) {
-      setMotorSpeed(MAX_MOTOR_SPEED);
-
       delay(20);
     }
 
@@ -286,9 +283,10 @@ void timedDebug(void) {
   Serial.print(" state:");
   Serial.println(state,DEC);
 
- Serial.print(" left/right:");
- Serial.println(analogRead(PIN_LEFT_TAPESENSOR));
- Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
+  Serial.print(" left/right: ");
+  Serial.print(analogRead(PIN_LEFT_TAPESENSOR));
+  Serial.print(" / ");
+  Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
 
  // Serial.print(" sonar:");
  // Serial.println(debugSonar());

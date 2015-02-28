@@ -17,19 +17,17 @@ void initTapeSensors() {
 	pinMode(PIN_LEFT_TAPESENSOR, INPUT);
 }
 
-// TODO: Threshold values, hysteresis (testing)
 unsigned char isLeftSensorOnTape() {
 	static unsigned char lastReadingOnTape = false;
 	static unsigned int lastReadingVal = 0;
+	unsigned int threshold;
 
 	unsigned int sensorVal; unsigned char result;
 
 	sensorVal = analogRead(PIN_LEFT_TAPESENSOR);
-        //Serial.println("LeftSensor Reading:");
-        //Serial.println(sensorVal);
 
-        
-	result = (sensorVal > TAPE_SENSOR_THRESHOLD_LEFT) ? true : false;
+    threshold = TAPE_SENSOR_THRESHOLD_LEFT + (lastReadingOnTape == false) ? TAPE_SENSOR_HYSTERESIS_LEFT : -TAPE_SENSOR_HYSTERESIS_LEFT;
+	result = (sensorVal > threshold) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;
@@ -39,14 +37,14 @@ unsigned char isLeftSensorOnTape() {
 unsigned char isRightSensorOnTape() {
 	static unsigned char lastReadingOnTape = false;
 	static unsigned int lastReadingVal = 0;
+	unsigned int threshold;
 
 	unsigned int sensorVal; unsigned char result;
 
 	sensorVal = analogRead(PIN_RIGHT_TAPESENSOR);
-        //Serial.println("RightSensor Reading:");
-        //Serial.println(sensorVal);
 
-	result = (sensorVal > TAPE_SENSOR_THRESHOLD_RIGHT) ? true : false;
+    threshold = TAPE_SENSOR_THRESHOLD_RIGHT + (lastReadingOnTape == false) ? TAPE_SENSOR_HYSTERESIS_RIGHT : -TAPE_SENSOR_HYSTERESIS_RIGHT;
+	result = (sensorVal > threshold) ? true : false;
 
 	lastReadingVal = sensorVal;
 	lastReadingOnTape = result;
