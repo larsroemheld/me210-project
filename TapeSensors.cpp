@@ -51,7 +51,24 @@ unsigned char isRightSensorOnTape() {
 	return result;
 }
 
-unsigned char areBothSensorsOnTape() {
-	return isLeftSensorOnTape() && isRightSensorOnTape();
+unsigned char isFrontSensorOnTape() {
+	static unsigned char lastReadingOnTape = false;
+	static unsigned int lastReadingVal = 0;
+	unsigned int threshold;
+
+	unsigned int sensorVal; unsigned char result;
+
+	sensorVal = analogRead(PIN_FRONT_TAPESENSOR);
+
+    threshold = TAPE_SENSOR_THRESHOLD_FRONT + (lastReadingOnTape == false) ? TAPE_SENSOR_HYSTERESIS_FRONT : -TAPE_SENSOR_HYSTERESIS_FRONT;
+	result = (sensorVal > threshold) ? true : false;
+
+	lastReadingVal = sensorVal;
+	lastReadingOnTape = result;
+	return result;
+}
+
+unsigned char areAllSensorsOnTape() {
+	return isLeftSensorOnTape() && isRightSensorOnTape() && isFrontSensorOnTape();
 }
 

@@ -29,8 +29,7 @@
 /* State Machine. Prefix S_, middle abbreviation for functional component */ 
 #define S_START             0
 // Find line
-#define S_FL_GETFIRSTBALLS  1
-#define S_FL_FWDSEARCH      2
+#define S_FL_FINDLINE       2
 #define S_FL_TURNONLINE     3
 // Go Forward
 #define S_GF_FWD            4
@@ -44,13 +43,13 @@
 #define S_DUNK             11
 
 // NEVER WRITE TO THIS VARIABLE DIRECTLY, ALWAYS USE setState()!
-unsigned char state = S_GF_FWD; // Global;
+unsigned char state = S_START; // Global;
 
 
 /* Timers */
 #define T_DEBUG              0
-#define T_DEBUG_INTERVAL  200
-#define T_GAME
+#define T_DEBUG_INTERVAL  1000
+#define T_GAME               1
 #define T_GAME_LENGTH     120*1000
 
 /* Which side of the center line are we on? */
@@ -62,6 +61,7 @@ unsigned char startArenaSide = SIDE_UNKNOWN;
 /* Sensor parameters and thresholds */
 #define HALF_FIELD_WIDTH 24 // Half the field width, used as threshold for ultrasonic side sensing on startup
 #define SONAR_START_ACCURACY_PINGS 20 // How many sonar pings we send off and average over when we start the game
+#define SONAR_LOOP_ACCURACY_PINGS   5 // How many sonar pings we send off and average over when periodically checking distance (blocking!)
 
 int temp_debug = true;
 
@@ -75,15 +75,23 @@ void setup() {  // setup() function required for Arduino
   initBumpers();
   initMotors();
   initTapeSensors();
-//  initSonar();
+  initSonar();
 
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
+  TMRArd_InitTimer(T_GAME, T_GAME_LENGTH);
   setState(state);  
 }
 
 void loop() {  // loop() function required for Arduino
   if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
-  
+  // Break after game
+  // if (TMRArd_IsTimerExpired(T_GAME)) while (true) delay(100);
+
+  //DEBUG
+  // delay(50);
+  // return;
+
+
   if(Serial.available() || temp_debug == true) {
     temp_debug = false;
     Serial.println("STOPPED");
@@ -93,42 +101,50 @@ void loop() {  // loop() function required for Arduino
     while (!Serial.available()) { delay(100); }
     c = Serial.read();
     Serial.println("CONTINUED");
-    setState(S_GF_FWD);
+    setState(S_START);
   }
 
 
   switch (state) {
     case S_START:
-      int startDistanceToLeft;
+      int startDistanceToFront;
       // Send SONAR_START_ACCURACY_PINGS pings, average distance
-      startDistanceToLeft = getSonarLeftDistanceInInches(SONAR_START_ACCURACY_PINGS);
+      startDistanceToFront = getSonarFrontDistanceInInches(SONAR_START_ACCURACY_PINGS);
       
-      // TODO: test what if we happen to start right on the line
-      startArenaSide = (startDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
+      startArenaSide = (startDistanceToFront < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
 
-      setState(S_FL_GETFIRSTBALLS);
+      setState(S_FL_FINDLINE);
       break;
-    case S_FL_GETFIRSTBALLS:
-      Serial.println("WARNING: State machine was in S_FL_GETFIRSTBALLS, but this should always be a transient state!");
-      break;
-    case S_FL_FWDSEARCH:
-      if (areBothSensorsOnTape()) setState(S_FL_TURNONLINE);
+    case S_FL_FINDLINE:
+      /* If we think we are in the left side (hence going towards the right) and end up half-way between center line 
+         and the right side, we were on the right side inititally (or we missed the line). In that case, reverse!   */
+      // NOTE: this is somewhat blocking code, keep in mind for debug!
+      int curDistanceToFront;
+      curDistanceToFront = getSonarFrontDistanceInInches(SONAR_LOOP_ACCURACY_PINGS);
+      // if (startArenaSide == SIDE_LEFT && curDistanceToFront >= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();
+      // if (startArenaSide == SIDE_RIGHT && curDistanceToFront <= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();      
+
+
+      Serial.println(isLeftSensorOnTape());
+      Serial.println(isRightSensorOnTape());
+
+      if (isLeftSensorOnTape() && isRightSensorOnTape()) setState(S_FL_TURNONLINE);
       break;
     case S_FL_TURNONLINE:
-      Serial.println("WARNING: State machine was in S_FL_TURNONLINE, but this should always be a transient state!");
+      if (isFrontSensorOnTape()) setState(S_GR_RELOAD);
       break;
     case S_GF_FWD:
-//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+      if (isAnyFrontBumperPressed()) setState(S_DUNK);
       if (!isLeftSensorOnTape()) setState(S_GF_TORIGHT);
       if (!isRightSensorOnTape()) setState(S_GF_TOLEFT);
       break;
     case S_GF_TOLEFT:
-//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
-      if (areBothSensorsOnTape()) setState(S_GF_FWD);
+      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+      if (areAllSensorsOnTape()) setState(S_GF_FWD);
       break;
     case S_GF_TORIGHT:
-//      if (isAnyFrontBumperPressed()) setState(S_DUNK);
-      if (areBothSensorsOnTape()) setState(S_GF_FWD);
+      if (isAnyFrontBumperPressed()) setState(S_DUNK);
+      if (areAllSensorsOnTape()) setState(S_GF_FWD);
       break;
     case S_GR_REV:
       if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
@@ -137,11 +153,11 @@ void loop() {  // loop() function required for Arduino
       break;
     case S_GR_TOLEFT:
       if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
-      if (areBothSensorsOnTape()) setState(S_GR_REV);
+      if (areAllSensorsOnTape()) setState(S_GR_REV);
       break;
     case S_GR_TORIGHT:
       if (isAnyBackBumperPressed()) setState(S_GR_RELOAD);
-      if (areBothSensorsOnTape()) setState(S_GR_REV);
+      if (areAllSensorsOnTape()) setState(S_GR_REV);
       break;
     case S_GR_RELOAD:
       break;
@@ -162,47 +178,45 @@ void setState (unsigned int newState) {
   switch (newState) {
     case S_START:
       break;
-    case S_FL_GETFIRSTBALLS:
-      requestBalls(3);
-      
+    case S_FL_FINDLINE:
       arenaTurnSign = (startArenaSide == SIDE_LEFT) ? 1 : -1;
-      
-      turnRightInPlace(200, arenaTurnSign * MAX_MOTOR_SPEED / 2);
 
-      setState(S_FL_FWDSEARCH);
-      break;
-    case S_FL_FWDSEARCH:
-      setMotorSpeed(MAX_MOTOR_SPEED);
+      if (startArenaSide == SIDE_LEFT) {
+        // Manually fine-tuned values
+        setLeftMotorSpeed( 145);
+        setRightMotorSpeed(155);
+      } else {
+        // Manually fine-tuned values
+        setLeftMotorSpeed( -145);
+        setRightMotorSpeed(-155);
+      }
       break;
     case S_FL_TURNONLINE:
-      arenaTurnSign = (startArenaSide == SIDE_LEFT) ? 1 : -1;
-      
-      turnRightInPlace(500, - arenaTurnSign * MAX_MOTOR_SPEED / 2);
-
-      setState(S_GF_FWD);
+      setLeftMotorSpeed(  135);
+      setRightMotorSpeed(-145);
       break;
     case S_GF_FWD:
-      setMotorSpeed(MAX_MOTOR_SPEED);
+      setMotorSpeed(215);
       break;
     case S_GF_TOLEFT:
-      setLeftMotorSpeed(MAX_MOTOR_SPEED * 3 / 5);
-      setRightMotorSpeed(MAX_MOTOR_SPEED);
+      setLeftMotorSpeed( 165);
+      setRightMotorSpeed(215);
       break;
     case S_GF_TORIGHT:
-      setLeftMotorSpeed(MAX_MOTOR_SPEED);
-      setRightMotorSpeed(MAX_MOTOR_SPEED * 3 / 5);
+      setLeftMotorSpeed( 215);
+      setRightMotorSpeed(165);
       break;
       
     case S_GR_REV:
-      setMotorSpeed(-MAX_MOTOR_SPEED);
+      setMotorSpeed(-215);
       break;
     case S_GR_TOLEFT:
-      setLeftMotorSpeed(- MAX_MOTOR_SPEED * 3 / 5);
-      setRightMotorSpeed(- MAX_MOTOR_SPEED);
+      setLeftMotorSpeed( -165);
+      setRightMotorSpeed(-215);
       break;
     case S_GR_TORIGHT:
-      setLeftMotorSpeed(- MAX_MOTOR_SPEED);
-      setRightMotorSpeed(- MAX_MOTOR_SPEED * 3 / 5);
+      setLeftMotorSpeed( -215);
+      setRightMotorSpeed(-165);
       break;
     case S_GR_RELOAD:
       requestBalls(3);
@@ -230,39 +244,31 @@ void requestBalls(char numBalls) {
 
   for (int iBall = 1; iBall <= numBalls; iBall++) {
     // Make sure we hit the bumper
-    setMotorSpeed(-MAX_MOTOR_SPEED);
+    Serial.print("Request ");
+    Serial.print(iBall);
+
     while (!isAnyBackBumperPressed()) {
+      setMotorSpeed(-MAX_MOTOR_SPEED);
       delay(20);
     }
+    Serial.print("Bumper contact");
 
-    // Push a little further, then Wait for a moment to show off pressed state
-    delay(100);
+    // Wait for a moment to show off pressed state
     setMotorSpeed(0);
     delay(500);
 
     // Release the bumper
+    Serial.print("Release!");
     setMotorSpeed(MAX_MOTOR_SPEED);
     while (isAnyBackBumperPressed()) {
       delay(20);
     }
+    Serial.print("Released!");
 
     // Wait for ball
     setMotorSpeed(0);
     delay(2000);   
   }
-}
-
-// Will turn on the spot. Will turn right for positive turnSpeed, left for negative turnSpeed. The parameter gives the duration and speed of the turn.
-void turnRightInPlace(unsigned int milliSecs, signed int turnSpeed) {
-  signed int oldLeftSpeed, oldRightSpeed;
-
-  oldLeftSpeed = setLeftMotorSpeed(   -turnSpeed);
-  oldRightSpeed = setRightMotorSpeed(  turnSpeed);
-
-  delay(milliSecs);
-
-  setLeftMotorSpeed(oldLeftSpeed);
-  setRightMotorSpeed(oldRightSpeed);
 }
 
 void dunkBalls() {
@@ -275,6 +281,7 @@ void dunkBalls() {
 void timedDebug(void) {
   static int Time = 0;
   int temp;
+  return;
   
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
@@ -283,10 +290,24 @@ void timedDebug(void) {
   Serial.print(" state:");
   Serial.println(state,DEC);
 
-  Serial.print(" left/right: ");
-  Serial.print(analogRead(PIN_LEFT_TAPESENSOR));
-  Serial.print(" / ");
-  Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
+  Serial.println("Tape Left/Right/Front:");
+  Serial.println(isLeftSensorOnTape());
+  Serial.println(isRightSensorOnTape());
+  Serial.println(isFrontSensorOnTape());
+
+  Serial.println("Bumper FrontLeft, FrontRight, BackLeft, BackRight:");
+  Serial.println(isLeftFrontBumperPressed());
+  Serial.println(isRightFrontBumperPressed());
+  Serial.println(isLeftBackBumperPressed());
+  Serial.println(isRightBackBumperPressed());
+
+  Serial.println("Sonar inches:");
+  Serial.println(getSonarFrontDistanceInInches(5));
+
+  // Serial.print(" left/right: ");
+  // Serial.print(analogRead(PIN_LEFT_TAPESENSOR));
+  // Serial.print(" / ");
+  // Serial.println(analogRead(PIN_RIGHT_TAPESENSOR));
 
  // Serial.print(" sonar:");
  // Serial.println(debugSonar());

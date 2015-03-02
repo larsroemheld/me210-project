@@ -17,13 +17,16 @@
 
 #define PIN_LEFT_TAPESENSOR   A1
 #define PIN_RIGHT_TAPESENSOR  A0
+#define PIN_FRONT_TAPESENSOR  A2
 
 #define MAX_ANALOG_READ 1023
 
-#define TAPE_SENSOR_THRESHOLD_LEFT 100
-#define TAPE_SENSOR_THRESHOLD_RIGHT 100
-#define TAPE_SENSOR_HYSTERESIS_LEFT  30
-#define TAPE_SENSOR_HYSTERESIS_RIGHT 30
+#define TAPE_SENSOR_THRESHOLD_LEFT   100
+#define TAPE_SENSOR_THRESHOLD_RIGHT  100
+#define TAPE_SENSOR_HYSTERESIS_LEFT   0
+#define TAPE_SENSOR_HYSTERESIS_RIGHT  0
+#define TAPE_SENSOR_THRESHOLD_FRONT  100
+#define TAPE_SENSOR_HYSTERESIS_FRONT  0
 
 
 
@@ -31,7 +34,8 @@ void initTapeSensors();
 
 unsigned char isLeftSensorOnTape();
 unsigned char isRightSensorOnTape();
-unsigned char areBothSensorsOnTape();
+unsigned char isFrontSensorOnTape();
+unsigned char areAllSensorsOnTape();
 
 
 #endif

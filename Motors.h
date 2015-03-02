@@ -31,5 +31,7 @@ signed int setLeftMotorSpeed(signed int newSpeed);
 signed int setRightMotorSpeed(signed int newSpeed);
 // Set both motor speeds, return nothing.
 void setMotorSpeed(signed int newSpeed);
+// Whatever speed both motors have, reverse them at the same speed.
+void reverseMotors();
 
 #endif

@@ -11,6 +11,10 @@
 
 #include "Motors.h"
 
+// Module-wide global
+static signed int leftSpeed = 0;
+static signed int rightSpeed = 0;
+
 
 void initMotors() {
 	// "You do not need to call "pinMode(PIN_LEFT_MOTOR, OUTPUT);" before using analogWrite()
@@ -20,8 +24,6 @@ void initMotors() {
 // Set speed of left motor, if newSpeed > (NULL_VALUE). Return old speed.
 // TODO: how do we handle 2 directions? DIR pin or DC polarity?
 signed int setLeftMotorSpeed(signed int newSpeed) {
-	static signed int leftSpeed = 0;
-
 	// NOTE: since motors are facing opposite directions, they need to be running in opposite directions to go forward. Hence this line.
     newSpeed = -newSpeed;
 
@@ -29,8 +31,6 @@ signed int setLeftMotorSpeed(signed int newSpeed) {
 	oldSpeed = leftSpeed;
 	if (newSpeed > NULL_VALUE) {
 		leftSpeed = newSpeed;
- Serial.print(" LEFT SPEED NEW:");
- Serial.println(newSpeed);
 
 		// Set arduino motor outputs to value
 		analogWrite(PIN_LEFT_MOTOR_SPEED, (byte) abs(newSpeed));
@@ -42,15 +42,10 @@ signed int setLeftMotorSpeed(signed int newSpeed) {
 // Set speed of right motor, if newSpeed > (NULL_VALUE). Return old speed.
 // TODO: how do we handle 2 directions? DIR pin or DC polarity?
 signed int setRightMotorSpeed(signed int newSpeed) {
-	static signed int rightSpeed = 0;
-
 	int oldSpeed;
 	oldSpeed = rightSpeed;
 	if (newSpeed > NULL_VALUE) {
 		rightSpeed = newSpeed;
-
- Serial.print(" RIGHT SPEED NEW:");
- Serial.println(newSpeed);
 
 		// Set arduino motor outputs to value
 		analogWrite(PIN_RIGHT_MOTOR_SPEED, (byte) abs(newSpeed));
@@ -64,4 +59,7 @@ void setMotorSpeed(signed int newSpeed) {
   setRightMotorSpeed(newSpeed);
 }
 
-
+void reverseMotors() {
+	setLeftMotorSpeed(-leftSpeed);
+	setLeftMotorSpeed(-rightSpeed);	
+}
