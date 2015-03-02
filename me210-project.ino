@@ -40,7 +40,7 @@
 #define S_DUNK             11
 
 // NEVER WRITE TO THIS VARIABLE DIRECTLY, ALWAYS USE setState()!
-unsigned char state = S_GF_FWD; // Global;
+unsigned char state = S_START; // Global;
 
 
 /* Timers */
@@ -196,16 +196,29 @@ void setState (unsigned int newState) {
       break;
     case S_FL_FINDLINE:
       if (startArenaSide == SIDE_LEFT) {
-        // Manually fine-tuned values
+        // High PWM burst to ensure motor running
+        setLeftMotorSpeed(-255);
+        setRightMotorSpeed(-255);
+        delay(20);
+        // And then these are the real values
         setLeftMotorSpeed( -170);
         setRightMotorSpeed(-170);
       } else {
-        // Manually fine-tuned values
+        // High PWM burst to ensure motor running
+        setLeftMotorSpeed(255);
+        setRightMotorSpeed(255);
+        delay(20);
+        // And then these are the real values
         setLeftMotorSpeed( 170);
         setRightMotorSpeed(170);
-      }
+      } 
       break;
     case S_FL_TURNONLINE:
+      // High PWM burst to ensure motor running
+      setLeftMotorSpeed(255);
+      setRightMotorSpeed(-255);
+      delay(20);
+      // And then these are the real values
       setLeftMotorSpeed(  170);
       setRightMotorSpeed(-170);
       break;
@@ -214,7 +227,8 @@ void setState (unsigned int newState) {
       setRightMotorSpeed(215);
       break;
     case S_GR_REV:
-      setMotorSpeed(-180);
+      setLeftMotorSpeed( -215);
+      setRightMotorSpeed(-215);
       break;
     case S_GR_RELOAD:
       requestBalls(3);
@@ -245,8 +259,8 @@ void requestBalls(char numBalls) {
     Serial.print("Request ");
     Serial.println(iBall);
 
-    setLeftMotorSpeed(-155);
-    setRightMotorSpeed(-155);
+    setLeftMotorSpeed(-250);
+    setRightMotorSpeed(-250);
     while (!isAnyBackBumperPressed()) {
       lineFollowREV();
     }
@@ -258,8 +272,8 @@ void requestBalls(char numBalls) {
 
     // Release the bumper
     Serial.println("Release!");
-    setLeftMotorSpeed(155);
-    setRightMotorSpeed(155);
+    setLeftMotorSpeed(250);
+    setRightMotorSpeed(250);
     while (isAnyBackBumperPressed()) {
       lineFollowFWD();
     }
@@ -282,22 +296,25 @@ void dunkBalls() {
 
 void lineFollowFWD() {
   int left, right;
+  static int last_state = 0;
 
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
     setLeftMotorSpeed(210);
     setRightMotorSpeed(210);
+    last_state = 1;
   } else if (!left && !right) { // do nothing
-
-  }  else if (!left) {
-    setLeftMotorSpeed(210);
+    last_state = 2;
+  } else if (!left) {
+    setLeftMotorSpeed(230);
     setRightMotorSpeed(155);
+    last_state = 3;
   } else if (!right) {
     setLeftMotorSpeed(155);
-    setRightMotorSpeed(210);
+    setRightMotorSpeed(230);
+    last_state = 4;
   }
-  delay(50); // Debug: Does this actually work?
 }
 
 void lineFollowREV() {
@@ -307,16 +324,16 @@ void lineFollowREV() {
   right = isRightSensorOnTape();
   if (left && right) {
     setLeftMotorSpeed(-210);
-    setRightMotorSpeed(-200);
+    setRightMotorSpeed(-210);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
-    setLeftMotorSpeed(-210);
+    setLeftMotorSpeed(-230);
     setRightMotorSpeed(-155);
   } else if (!right) {
     setLeftMotorSpeed(-155);
-    setRightMotorSpeed(-200);
+    setRightMotorSpeed(-230);
   }
-  delay(50); // Debug: Does this actually work?
+//  delay(50); // Debug: Does this actually work?
 }
 
 void timedDebug(void) {
