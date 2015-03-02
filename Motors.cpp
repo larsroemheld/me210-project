@@ -18,15 +18,15 @@ static signed int rightSpeed = 0;
 
 void initMotors() {
 	// "You do not need to call "pinMode(PIN_LEFT_MOTOR, OUTPUT);" before using analogWrite()
-
+	digitalWrite(PIN_LEFT_MOTOR_DIR, OUTPUT);
+	digitalWrite(PIN_RIGHT_MOTOR_DIR, OUTPUT);
+	digitalWrite(PIN_LEFT_MOTOR_SPEED, OUTPUT);
+	digitalWrite(PIN_RIGHT_MOTOR_SPEED, OUTPUT);
 }
 
 // Set speed of left motor, if newSpeed > (NULL_VALUE). Return old speed.
 // TODO: how do we handle 2 directions? DIR pin or DC polarity?
 signed int setLeftMotorSpeed(signed int newSpeed) {
-	// NOTE: since motors are facing opposite directions, they need to be running in opposite directions to go forward. Hence this line.
-    newSpeed = -newSpeed;
-
 	int oldSpeed;
 	oldSpeed = leftSpeed;
 	if (newSpeed > NULL_VALUE) {
@@ -44,6 +44,10 @@ signed int setLeftMotorSpeed(signed int newSpeed) {
 signed int setRightMotorSpeed(signed int newSpeed) {
 	int oldSpeed;
 	oldSpeed = rightSpeed;
+
+	// NOTE: since motors are facing opposite directions, they need to be running in opposite directions to go forward. Hence this line.
+    newSpeed = -newSpeed;
+
 	if (newSpeed > NULL_VALUE) {
 		rightSpeed = newSpeed;
 
