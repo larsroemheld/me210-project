@@ -20,7 +20,7 @@
 #define PIN_LEFT_MOTOR_SPEED 5
 #define PIN_RIGHT_MOTOR_SPEED 6
 #define PIN_LEFT_MOTOR_DIR 7
-#define PIN_RIGHT_MOTOR_DIR 8`
+#define PIN_RIGHT_MOTOR_DIR 8
 
 
 void initMotors();

@@ -84,7 +84,8 @@ void setup() {  // setup() function required for Arduino
   TMRArd_InitTimer(T_GAME, T_GAME_LENGTH);
 
   setMotorSpeed(0);
-  setState(state);  
+  setState(S_START);  
+  delay(2000);
 }
 
 void loop() {  // loop() function required for Arduino
@@ -95,17 +96,17 @@ void loop() {  // loop() function required for Arduino
   // return;
   int left, right;
 
-  if(Serial.available() || temp_debug == true) {
-    temp_debug = false;
-    Serial.println("STOPPED");
-    setMotorSpeed(0);
-    unsigned char c;
-    c = Serial.read();
-    while (!Serial.available()) { delay(100); }
-    c = Serial.read();
-    Serial.println("CONTINUED");
-    setState(S_START);
-  }
+//  if(Serial.available() || temp_debug == true) {
+//    temp_debug = false;
+//    Serial.println("STOPPED");
+//    setMotorSpeed(0);
+//    unsigned char c;
+//    c = Serial.read();
+//    while (!Serial.available()) { delay(100); }
+//    c = Serial.read();
+//    Serial.println("CONTINUED");
+//    setState(S_START);
+//  }
 
   switch (state) {
     case S_START:
@@ -268,7 +269,9 @@ void requestBalls(char numBalls) {
     setLeftMotorSpeed(-250);
     setRightMotorSpeed(-250);
     while (!isAnyBackBumperPressed()) {
-      lineFollowREV();
+      //lineFollowREV();
+      setLeftMotorSpeed(-223);
+      setRightMotorSpeed(-230);
     }
     Serial.println("Bumper contact");
 
@@ -281,7 +284,9 @@ void requestBalls(char numBalls) {
     setLeftMotorSpeed(250);
     setRightMotorSpeed(250);
     while (isAnyBackBumperPressed()) {
-      lineFollowFWD();
+      //lineFollowFWD();
+      setLeftMotorSpeed(223);
+      setRightMotorSpeed(230);
     }
     delay(150);
     Serial.println("Released!");
@@ -319,24 +324,24 @@ void dunkBalls() {
 
 void lineFollowFWD() {
   int left, right;
-  static int last_state = 0;
+  //static int last_state = 0;
 
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(210);
-    setRightMotorSpeed(210);
-    last_state = 1;
+    setLeftMotorSpeed(223);
+    setRightMotorSpeed(230);
+    //last_state = 1;
   } else if (!left && !right) { // do nothing
-    last_state = 2;
+    //last_state = 2;
   } else if (!left) {
+    setLeftMotorSpeed(223);
+    setRightMotorSpeed(155);
+    //last_state = 3;
+  } else if (!right) {
     setLeftMotorSpeed(230);
     setRightMotorSpeed(155);
-    last_state = 3;
-  } else if (!right) {
-    setLeftMotorSpeed(155);
-    setRightMotorSpeed(230);
-    last_state = 4;
+    //last_state = 4;
   }
 }
 
@@ -346,15 +351,15 @@ void lineFollowREV() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(-210);
-    setRightMotorSpeed(-210);
+    setLeftMotorSpeed(-170);
+    setRightMotorSpeed(-170);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
-    setLeftMotorSpeed(-230);
+    setLeftMotorSpeed(-225);
     setRightMotorSpeed(-155);
   } else if (!right) {
     setLeftMotorSpeed(-155);
-    setRightMotorSpeed(-230);
+    setRightMotorSpeed(-225);
   }
 //  delay(50); // Debug: Does this actually work?
 }
