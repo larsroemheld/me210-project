@@ -52,7 +52,7 @@ unsigned char state = S_START; // Global;
 #define T_DEBUG              0
 #define T_DEBUG_INTERVAL  15
 #define T_GAME               1
-#define T_GAME_LENGTH     120*1000
+#define T_GAME_LENGTH     120000 // 120 Seconds = 2 minutes
 
 /* Which side of the center line are we on? */
 #define SIDE_UNKNOWN     0
@@ -96,12 +96,18 @@ void setup() {  // setup() function required for Arduino
 }
 
 void loop() {  // loop() function required for Arduino
+  // Note: debugging via serial connection is blocking and breaks line following
   // if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
+
   // Break after game
-  // if (TMRArd_IsTimerExpired(T_GAME)) while (true) delay(100);
-  // setMotorSpeed(0);
-  // return;
-  int left, right;
+  if (TMRArd_IsTimerExpired(T_GAME)) {
+    setMotorSpeed(0);
+    arm.write(50); // Wiggle wiggle wiggle
+    delay(1000);
+    arm.write(160);
+    delay(1000);
+    return;
+  };
 
 //  if(Serial.available() || temp_debug == true) {
 //    temp_debug = false;
@@ -115,6 +121,7 @@ void loop() {  // loop() function required for Arduino
 //    setState(S_START);
 //  }
 
+  int left, right;
   switch (state) {
     case S_START:
       int startDistanceToFront;
@@ -136,20 +143,13 @@ void loop() {  // loop() function required for Arduino
       /* If we think we are in the left side (hence going towards the right) and end up half-way between center line 
          and the right side, we were on the right side inititally (or we missed the line). In that case, reverse!   */
       // NOTE: this is somewhat blocking code, keep in mind for debug!
-      int curDistanceToFront;
+      // int curDistanceToFront;
       // curDistanceToFront = getSonarFrontDistanceInInches(SONAR_LOOP_ACCURACY_PINGS);
       // if (startArenaSide == SIDE_LEFT && curDistanceToFront >= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();
       // if (startArenaSide == SIDE_RIGHT && curDistanceToFront <= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();      
 
-
       left = isLeftSensorOnTape();
       right = isRightSensorOnTape();
-      // if (left) {
-      //   setLeftMotorSpeed(0); 
-      // }
-      // if (right) {
-      //   setRightMotorSpeed(0);
-      // }
 
       if (left && right) {
         // Break the bot
@@ -282,9 +282,6 @@ void requestBalls(char numBalls) {
 
   for (int iBall = 1; iBall <= numBalls; iBall++) {
     // Make sure we hit the bumper
-    Serial.print("Request ");
-    Serial.println(iBall);
-
     setLeftMotorSpeed(-170);
     setRightMotorSpeed(-170);
     while (!isAnyBackBumperPressed()) {
@@ -292,23 +289,20 @@ void requestBalls(char numBalls) {
       setLeftMotorSpeed(-215);
       setRightMotorSpeed(-205);
     }
-    Serial.println("Bumper contact");
 
     // Wait for a moment to show off pressed state
     setMotorSpeed(0);
     delay(500);
 
     // Release the bumper
-    Serial.println("Release!");
     setLeftMotorSpeed(170);
     setRightMotorSpeed(170);
     while (isAnyBackBumperPressed()) {
-      //we33lineFollowFWD();
+      //lineFollowFWD();
       setLeftMotorSpeed(223);
       setRightMotorSpeed(230);
     }
     delay(150);
-    Serial.println("Released!");
 
     // Wait for ball
     setMotorSpeed(0);
@@ -318,7 +312,6 @@ void requestBalls(char numBalls) {
 
 void dunkBalls() {
   setMotorSpeed(0);
-  Serial.println("DUNK!");
   delay(1000);
   
   // Make sure the servo is initially stopped
@@ -413,46 +406,39 @@ void timedDebug(void) {
 
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
-  // Serial.println('----------------------------------------------');
-  // Serial.print(" time:");
-  // Serial.print(++Time);
-  // Serial.print(" state:");
-  // Serial.println(state,DEC);
+  Serial.println('----------------------------------------------');
+  Serial.print(" time:");
+  Serial.print(++Time);
+  Serial.print(" state:");
+  Serial.println(state,DEC);
 
-  // Serial.println("TAPE Left/Right/Front:");
-  // Serial.print(isLeftSensorOnTape());
-  // Serial.print(" / ");
-  // Serial.print(isRightSensorOnTape());
-  // Serial.print(" / ");
-  // Serial.println(isFrontSensorOnTape());
-  // Serial.println("LIGHT left/right/front: ");
-  // Serial.print(analogRead(PIN_LEFT_TAPESENSOR));
-  // Serial.print(" / ");
-  // Serial.print(analogRead(PIN_RIGHT_TAPESENSOR));
-  // Serial.print(" / ");
-  // Serial.println(analogRead(PIN_FRONT_TAPESENSOR));
+  Serial.println("TAPE Left/Right/Front:");
+  Serial.print(isLeftSensorOnTape());
+  Serial.print(" / ");
+  Serial.print(isRightSensorOnTape());
+  Serial.print(" / ");
+  Serial.println(isFrontSensorOnTape());
+  Serial.println("LIGHT left/right/front: ");
+  Serial.print(analogRead(PIN_LEFT_TAPESENSOR));
+  Serial.print(" / ");
+  Serial.print(analogRead(PIN_RIGHT_TAPESENSOR));
+  Serial.print(" / ");
+  Serial.println(analogRead(PIN_FRONT_TAPESENSOR));
 
-  // Serial.println("Bumper FrontLeft, FrontRight, BackLeft, BackRight:");
-  // Serial.print(isLeftFrontBumperPressed());
-  // Serial.print(" / ");
-  // Serial.print(isRightFrontBumperPressed());
-  // Serial.print(" / ");
-  // Serial.print(isLeftBackBumperPressed());
-  // Serial.print(" / ");
-  // Serial.println(isRightBackBumperPressed());
+  Serial.println("Bumper FrontLeft, FrontRight, BackLeft, BackRight:");
+  Serial.print(isLeftFrontBumperPressed());
+  Serial.print(" / ");
+  Serial.print(isRightFrontBumperPressed());
+  Serial.print(" / ");
+  Serial.print(isLeftBackBumperPressed());
+  Serial.print(" / ");
+  Serial.println(isRightBackBumperPressed());
 
-  // Serial.print("Sonar inches: ");
-  // Serial.println(getSonarFrontDistanceInInches(5));
+  Serial.print("Sonar inches: ");
+  Serial.println(getSonarFrontDistanceInInches(5));
 
- // Serial.print(" sonar:");
- // Serial.println(debugSonar());
-
+ Serial.print(" sonar:");
+ Serial.println(debugSonar());
 }
-
-
-
-
-
-
 
 
