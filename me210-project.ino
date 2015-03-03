@@ -36,8 +36,9 @@ Servo arm;
 // Find line
 #define S_FL_FINDLINE       2
 #define S_FL_TURNONLINE     3
+#define S_GET_BALLS         4
 // Go Forward
-#define S_GF_FWD            4
+#define S_GF_FWD            5
 // Go Reverse
 #define S_GR_REV            7
 #define S_GR_RELOAD        10
@@ -172,9 +173,15 @@ void loop() {  // loop() function required for Arduino
           delay(135);
           setMotorSpeed(0);
           delay(1500);
-          setState(S_GR_REV);
+          setState(S_GET_BALLS);
       }
       break;
+    case S_GET_BALLS:
+      while(!isAnyBackBumperPressed()) {
+        setLeftMotorSpeed(-220);
+        setRightMotorSpeed(-230);
+      }
+      setState(S_GR_RELOAD);
     case S_GF_FWD:
       lineFollowFWD();
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
@@ -320,7 +327,7 @@ void dunkBalls() {
   
   // Move the arm up
   arm.write(20);
-  delay(455);
+  delay(435);
   
   // Wait to score points
   arm.write(90);
@@ -343,7 +350,7 @@ void lineFollowFWD() {
   right = isRightSensorOnTape();
   //forward = isFrontSensorOnTape();
   
-  if (getSonarFrontDistanceInInches(SONAR_START_ACCURACY_PINGS) < 3) { //Close to wall
+  /*if (getSonarFrontDistanceInInches(1) < 3) { //Close to wall
     if (left && right) {
       setLeftMotorSpeed(150);
       setRightMotorSpeed(165);
@@ -360,10 +367,10 @@ void lineFollowFWD() {
       setRightMotorSpeed(200);
       lastTurn = TURN_LEFT;
       //last_state = 4;
-    }
-  } else if (left && right) {
-      setLeftMotorSpeed(215);
-      setRightMotorSpeed(230);
+    }*/
+  if (left && right) {
+      setLeftMotorSpeed(220);
+      setRightMotorSpeed(225);
       //last_state = 1;
   } else if (!left && !right) { // do nothing
     //Just Experimenting with getting back on line
@@ -397,17 +404,17 @@ void lineFollowFWD() {
       }**/
     //last_state = 2;
   } else if (!left) {
-    setLeftMotorSpeed(255);
-    setRightMotorSpeed(150);
-    lastTurn = TURN_RIGHT;
+    //setLeftMotorSpeed(255);
+    setRightMotorSpeed(155);
+    //lastTurn = TURN_RIGHT;
     //last_state = 3;
   } else if (!right) {
-    setLeftMotorSpeed(150);
-    setRightMotorSpeed(255);
-    lastTurn = TURN_LEFT;
+    setLeftMotorSpeed(155);
+    //setRightMotorSpeed(255);
+    //lastTurn = TURN_LEFT;
     //last_state = 4;
   }
-  delay(30);
+  delay(38);
 }
 
 void lineFollowREV() {
@@ -416,17 +423,17 @@ void lineFollowREV() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(-215);
-    setRightMotorSpeed(-230);
+    setLeftMotorSpeed(-225);
+    setRightMotorSpeed(-215);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
-    setLeftMotorSpeed(-255);
-    setRightMotorSpeed(-150);
+    //setLeftMotorSpeed(-255);
+    setRightMotorSpeed(-160);
   } else if (!right) {
-    setLeftMotorSpeed(-150);
-    setRightMotorSpeed(-255);
+    setLeftMotorSpeed(-160);
+    //setRightMotorSpeed(-255);
   }
-  delay(30);
+  delay(35);
 //  delay(50); // Debug: Does this actually work?
 }
 
