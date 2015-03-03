@@ -289,8 +289,8 @@ void requestBalls(char numBalls) {
     setRightMotorSpeed(-170);
     while (!isAnyBackBumperPressed()) {
       //lineFollowREV();
-      setLeftMotorSpeed(-223);
-      setRightMotorSpeed(-230);
+      setLeftMotorSpeed(-215);
+      setRightMotorSpeed(-205);
     }
     Serial.println("Bumper contact");
 
@@ -369,40 +369,10 @@ void lineFollowFWD() {
       //last_state = 4;
     }*/
   if (left && right) {
-      setLeftMotorSpeed(220);
-      setRightMotorSpeed(225);
+      setLeftMotorSpeed(210);
+      setRightMotorSpeed(205);
       //last_state = 1;
-  } else if (!left && !right) { // do nothing
-    //Just Experimenting with getting back on line
-      /**if(lastTurn == TURN_LEFT) {
-        setMotorSpeed(0);
-        delay(100);
-        while(!isFrontSensorOnTape()) {
-          setLeftMotorSpeed(-200);
-          setRightMotorSpeed(200);
-        }
-        delay(100);
-        while(!left && !right) {
-          setLeftMotorSpeed(215);
-          setRightMotorSpeed(230);
-        }
-        delay(100);
-      }
-      else if (lastTurn == TURN_RIGHT) {
-        setMotorSpeed(0);
-        delay(100);
-        while(!isFrontSensorOnTape()) {
-          setLeftMotorSpeed(200);
-          setRightMotorSpeed(-200);
-        }
-        delay(100);
-        while(!left && !right) {
-          setLeftMotorSpeed(215);
-          setRightMotorSpeed(230);
-        }
-        delay(100);
-      }**/
-    //last_state = 2;
+  } else if (!left && !right) {
   } else if (!left) {
     //setLeftMotorSpeed(255);
     setRightMotorSpeed(155);
@@ -414,7 +384,7 @@ void lineFollowFWD() {
     //lastTurn = TURN_LEFT;
     //last_state = 4;
   }
-  delay(38);
+  delay(35);
 }
 
 void lineFollowREV() {
@@ -423,14 +393,14 @@ void lineFollowREV() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(-225);
-    setRightMotorSpeed(-215);
+    setLeftMotorSpeed(-218);
+    setRightMotorSpeed(-205);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
     //setLeftMotorSpeed(-255);
-    setRightMotorSpeed(-160);
+    setRightMotorSpeed(-165);
   } else if (!right) {
-    setLeftMotorSpeed(-160);
+    setLeftMotorSpeed(-165);
     //setRightMotorSpeed(-255);
   }
   delay(35);
