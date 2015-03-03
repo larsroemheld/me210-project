@@ -59,12 +59,18 @@ unsigned char state = S_START; // Global;
 #define SIDE_RIGHT       2
 unsigned char startArenaSide = SIDE_UNKNOWN;
 
+/* Which way did we last turn? */
+#define NO_TURN          0
+#define TURN_LEFT        1
+#define TURN_RIGHT       2
+
 /* Sensor parameters and thresholds */
 #define HALF_FIELD_WIDTH 19 // Half the field width minus offset, used as threshold for ultrasonic side sensing on startup
 #define SONAR_START_ACCURACY_PINGS 20 // How many sonar pings we send off and average over when we start the game
 #define SONAR_LOOP_ACCURACY_PINGS   5 // How many sonar pings we send off and average over when periodically checking distance (blocking!)
 
 int temp_debug = true;
+static unsigned char lastTurn = NO_TURN;
 
 /*---------------- Module Function Prototypes ---------------*/
 
@@ -163,10 +169,9 @@ void loop() {  // loop() function required for Arduino
       if (isFrontSensorOnTape()) {
           setLeftMotorSpeed(-150);
           setRightMotorSpeed(150);
-          delay(140);
+          delay(135);
           setMotorSpeed(0);
           delay(1500);
-
           setState(S_GR_REV);
       }
       break;
@@ -239,6 +244,13 @@ void setState (unsigned int newState) {
       break;
     case S_GR_RELOAD:
       requestBalls(3);
+      /**if(!isLeftSensorOnTape() && !isRightSensorOnTape()) {
+        while(!isFrontSensorOnTape()) {
+          setLeftMotorSpeed(-165);
+          setRightMotorSpeed(165);
+        }
+      }
+      delay(1000);*/
       setState(S_GF_FWD);
       break;
     case S_DUNK:
@@ -266,8 +278,8 @@ void requestBalls(char numBalls) {
     Serial.print("Request ");
     Serial.println(iBall);
 
-    setLeftMotorSpeed(-250);
-    setRightMotorSpeed(-250);
+    setLeftMotorSpeed(-170);
+    setRightMotorSpeed(-170);
     while (!isAnyBackBumperPressed()) {
       //lineFollowREV();
       setLeftMotorSpeed(-223);
@@ -281,10 +293,10 @@ void requestBalls(char numBalls) {
 
     // Release the bumper
     Serial.println("Release!");
-    setLeftMotorSpeed(250);
-    setRightMotorSpeed(250);
+    setLeftMotorSpeed(170);
+    setRightMotorSpeed(170);
     while (isAnyBackBumperPressed()) {
-      //lineFollowFWD();
+      //we33lineFollowFWD();
       setLeftMotorSpeed(223);
       setRightMotorSpeed(230);
     }
@@ -300,14 +312,15 @@ void requestBalls(char numBalls) {
 void dunkBalls() {
   setMotorSpeed(0);
   Serial.println("DUNK!");
+  delay(1000);
   
   // Make sure the servo is initially stopped
   arm.write(90);
   delay(500);
   
   // Move the arm up
-  arm.write(50);
-  delay(425);
+  arm.write(20);
+  delay(455);
   
   // Wait to score points
   arm.write(90);
@@ -328,21 +341,73 @@ void lineFollowFWD() {
 
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
-  if (left && right) {
-    setLeftMotorSpeed(223);
-    setRightMotorSpeed(230);
-    //last_state = 1;
+  //forward = isFrontSensorOnTape();
+  
+  if (getSonarFrontDistanceInInches(SONAR_START_ACCURACY_PINGS) < 3) { //Close to wall
+    if (left && right) {
+      setLeftMotorSpeed(150);
+      setRightMotorSpeed(165);
+    }
+    else if (!left && !right) {
+      //Do nothing
+    } else if (!left) {
+      setLeftMotorSpeed(200);
+      setRightMotorSpeed(150);
+      lastTurn = TURN_RIGHT;
+      //last_state = 3;
+    } else if (!right) {
+      setLeftMotorSpeed(150);
+      setRightMotorSpeed(200);
+      lastTurn = TURN_LEFT;
+      //last_state = 4;
+    }
+  } else if (left && right) {
+      setLeftMotorSpeed(215);
+      setRightMotorSpeed(230);
+      //last_state = 1;
   } else if (!left && !right) { // do nothing
+    //Just Experimenting with getting back on line
+      /**if(lastTurn == TURN_LEFT) {
+        setMotorSpeed(0);
+        delay(100);
+        while(!isFrontSensorOnTape()) {
+          setLeftMotorSpeed(-200);
+          setRightMotorSpeed(200);
+        }
+        delay(100);
+        while(!left && !right) {
+          setLeftMotorSpeed(215);
+          setRightMotorSpeed(230);
+        }
+        delay(100);
+      }
+      else if (lastTurn == TURN_RIGHT) {
+        setMotorSpeed(0);
+        delay(100);
+        while(!isFrontSensorOnTape()) {
+          setLeftMotorSpeed(200);
+          setRightMotorSpeed(-200);
+        }
+        delay(100);
+        while(!left && !right) {
+          setLeftMotorSpeed(215);
+          setRightMotorSpeed(230);
+        }
+        delay(100);
+      }**/
     //last_state = 2;
   } else if (!left) {
-    setLeftMotorSpeed(223);
-    setRightMotorSpeed(155);
+    setLeftMotorSpeed(255);
+    setRightMotorSpeed(150);
+    lastTurn = TURN_RIGHT;
     //last_state = 3;
   } else if (!right) {
-    setLeftMotorSpeed(230);
-    setRightMotorSpeed(155);
+    setLeftMotorSpeed(150);
+    setRightMotorSpeed(255);
+    lastTurn = TURN_LEFT;
     //last_state = 4;
   }
+  delay(30);
 }
 
 void lineFollowREV() {
@@ -351,16 +416,17 @@ void lineFollowREV() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(-170);
-    setRightMotorSpeed(-170);
+    setLeftMotorSpeed(-215);
+    setRightMotorSpeed(-230);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
-    setLeftMotorSpeed(-225);
-    setRightMotorSpeed(-155);
+    setLeftMotorSpeed(-255);
+    setRightMotorSpeed(-150);
   } else if (!right) {
-    setLeftMotorSpeed(-155);
-    setRightMotorSpeed(-225);
+    setLeftMotorSpeed(-150);
+    setRightMotorSpeed(-255);
   }
+  delay(30);
 //  delay(50); // Debug: Does this actually work?
 }
 
