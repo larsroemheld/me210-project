@@ -13,6 +13,10 @@
 // ME210 Timers included for timing
 #include "Timers.h"
 
+// Setup for servo
+#include <Servo.h>
+Servo arm;
+
 // Our motor module
 #include "Motors.h"
 // Our bumber module
@@ -68,6 +72,8 @@ int temp_debug = true;
 void setup() {  // setup() function required for Arduino
   Serial.begin(9600);
   Serial.println("Skip to my loop!");
+  
+  arm.attach(6);
 
   initBumpers();
   initMotors();
@@ -287,9 +293,26 @@ void requestBalls(char numBalls) {
 }
 
 void dunkBalls() {
-  Serial.println("DUNK!");
   setMotorSpeed(0);
+  Serial.println("DUNK!");
+  
+  // Make sure the servo is initially stopped
+  arm.write(90);
+  delay(500);
+  
+  // Move the arm up
+  arm.write(50);
+  delay(425);
+  
+  // Wait to score points
+  arm.write(90);
   delay(2000);
+  
+  // Move arm back down
+  arm.write(165);
+  delay(440);
+  
+  delay(1000);
 }
 
 /*---------------- Module Functions -------------------------*/
