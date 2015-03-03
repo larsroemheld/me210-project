@@ -17,8 +17,8 @@
 
 #include "NewPing.h"
 
-#define PIN_FRONT_SONAR_TRIGGER   9
-#define PIN_FRONT_SONAR_ECHO      8
+#define PIN_FRONT_SONAR_TRIGGER   1
+#define PIN_FRONT_SONAR_ECHO      0
 
 // Maximum range to be sensed by sonar in cm
 #define MAX_SONAR_RANGE_CM     200
