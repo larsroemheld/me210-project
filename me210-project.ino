@@ -329,7 +329,7 @@ void requestBalls(char numBalls) {
 
     // Break turning motion
     setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
-    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
+    setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
     delay(70);
     setMotorSpeed(0);
     delay(150);
@@ -345,7 +345,7 @@ void requestBalls(char numBalls) {
     setRightMotorSpeed(-160);
     delay(100);
     setMotorSpeed(0);
-    delay(200);
+    delay(300);
 
     // Turn towards center line
     while (!isFrontSensorOnTape()) {
@@ -355,7 +355,7 @@ void requestBalls(char numBalls) {
 
     // Break turning motion
     setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
-    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
+    setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
     delay(100);
     setMotorSpeed(0);
     delay(150);
