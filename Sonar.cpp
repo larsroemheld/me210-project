@@ -16,14 +16,11 @@
 // module-wide object; needed to be global so all internal functions work with this
 // object without coupling the sensor to other parts of code
 static NewPing Sonar_FrontSonar(PIN_FRONT_SONAR_TRIGGER, PIN_FRONT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
+static NewPing Sonar_LeftSonar(PIN_LEFT_SONAR_TRIGGER, PIN_LEFT_SONAR_ECHO, MAX_SONAR_RANGE_CM);
 
 void initSonar(void) {
   // None, since object is initialized globally
 }
-
-int debugSonar(void) {
-  return Sonar_FrontSonar.convert_in(Sonar_FrontSonar.ping_median(10));
-}  
 
 unsigned char getSonarFrontDistanceInInches(unsigned char numPings) {
 	unsigned int medianSonarMicroSeconds, medianSonarIn;
@@ -32,4 +29,13 @@ unsigned char getSonarFrontDistanceInInches(unsigned char numPings) {
 	medianSonarIn = Sonar_FrontSonar.convert_in(medianSonarMicroSeconds);
 
 	return medianSonarIn;
+}
+
+unsigned char getSonarLeftDistanceInInches(unsigned char numPings) {
+  unsigned int medianSonarMicroSeconds, medianSonarIn;
+
+  medianSonarMicroSeconds = Sonar_LeftSonar.ping_median(numPings);
+  medianSonarIn = Sonar_LeftSonar.convert_in(medianSonarMicroSeconds);
+
+  return medianSonarIn;
 }

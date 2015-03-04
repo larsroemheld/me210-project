@@ -20,6 +20,10 @@
 #define PIN_FRONT_SONAR_TRIGGER   9
 #define PIN_FRONT_SONAR_ECHO      10
 
+#define PIN_LEFT_SONAR_TRIGGER    2
+#define PIN_LEFT_SONAR_ECHO       2
+
+
 // Maximum range to be sensed by sonar in cm
 #define MAX_SONAR_RANGE_CM     200
 
@@ -28,5 +32,6 @@ void initSonar();
 int debugSonar(void);
 
 unsigned char getSonarFrontDistanceInInches(unsigned char numPings);
+unsigned char getSonarLeftDistanceInInches(unsigned char numPings);
 
 #endif

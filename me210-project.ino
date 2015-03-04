@@ -91,14 +91,12 @@ void setup() {  // setup() function required for Arduino
   TMRArd_InitTimer(T_GAME, T_GAME_LENGTH);
 
   setMotorSpeed(0);
+  // TODO: read endgame switch, set flag to get only one ball
   setState(S_START);  
   delay(2000);
 }
 
 void loop() {  // loop() function required for Arduino
-  // Note: debugging via serial connection is blocking and breaks line following
-  // if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
-
   // Break after game
   if (TMRArd_IsTimerExpired(T_GAME)) {
     setMotorSpeed(0);
@@ -109,6 +107,8 @@ void loop() {  // loop() function required for Arduino
     return;
   };
 
+// Note: debugging via serial connection is blocking and breaks line following
+// if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
 //  if(Serial.available() || temp_debug == true) {
 //    temp_debug = false;
 //    Serial.println("STOPPED");
@@ -250,6 +250,7 @@ void setState (unsigned int newState) {
       setRightMotorSpeed(-215);
       break;
     case S_GR_RELOAD:
+    // TODO: RELOAD and GETBALLS are redundant, get rid of getballs again
       requestBalls(3);
       /**if(!isLeftSensorOnTape() && !isRightSensorOnTape()) {
         while(!isFrontSensorOnTape()) {
@@ -258,6 +259,7 @@ void setState (unsigned int newState) {
         }
       }
       delay(1000);*/
+
       setState(S_GF_FWD);
       break;
     case S_DUNK:
@@ -280,10 +282,9 @@ void requestBalls(char numBalls) {
   // assert numBalls correct
   if (numBalls < 1 or numBalls > 3) return;
 
+  // Get required number of balls
   for (int iBall = 1; iBall <= numBalls; iBall++) {
     // Make sure we hit the bumper
-    setLeftMotorSpeed(-170);
-    setRightMotorSpeed(-170);
     while (!isAnyBackBumperPressed()) {
       //lineFollowREV();
       setLeftMotorSpeed(-215);
@@ -295,8 +296,6 @@ void requestBalls(char numBalls) {
     delay(500);
 
     // Release the bumper
-    setLeftMotorSpeed(170);
-    setRightMotorSpeed(170);
     while (isAnyBackBumperPressed()) {
       //lineFollowFWD();
       setLeftMotorSpeed(223);
@@ -308,11 +307,66 @@ void requestBalls(char numBalls) {
     setMotorSpeed(0);
     delay(2000);   
   }
+
+  // Realign the bot to the line
+  if (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
+    // Align bot to wall again
+    while (!isAnyBackBumperPressed()) {
+      setLeftMotorSpeed(-215);
+      setRightMotorSpeed(-205);
+    }
+    setMotorSpeed(0);
+
+    int curDistanceToLeft, curArenaSide;
+    curDistanceToLeft = getSonarLeftDistanceInInches(SONAR_START_ACCURACY_PINGS);
+    curArenaSide = (curDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
+
+    // Turn towards center line
+    while (!isFrontSensorOnTape()) {
+      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);      
+      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);
+    }
+
+    // Break turning motion
+    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
+    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
+    delay(70);
+    setMotorSpeed(0);
+    delay(150);
+
+    // Go forward onto line
+    while (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
+      setLeftMotorSpeed( 170);
+      setRightMotorSpeed(170);      
+    }
+
+    // Break the forward movement
+    setLeftMotorSpeed(-160);
+    setRightMotorSpeed(-160);
+    delay(100);
+    setMotorSpeed(0);
+    delay(200);
+
+    // Turn towards center line
+    while (!isFrontSensorOnTape()) {
+      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);      
+      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);
+    }
+
+    // Break turning motion
+    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
+    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
+    delay(100);
+    setMotorSpeed(0);
+    delay(150);
+
+    // And off we go!
+  }
 }
 
 void dunkBalls() {
   setMotorSpeed(0);
-  delay(1000);
+  delay(300);
   
   // Make sure the servo is initially stopped
   arm.write(90);
@@ -329,8 +383,6 @@ void dunkBalls() {
   // Move arm back down
   arm.write(165);
   delay(440);
-  
-  delay(1000);
 }
 
 /*---------------- Module Functions -------------------------*/
@@ -436,9 +488,7 @@ void timedDebug(void) {
 
   Serial.print("Sonar inches: ");
   Serial.println(getSonarFrontDistanceInInches(5));
-
- Serial.print(" sonar:");
- Serial.println(debugSonar());
+  Serial.println(getSonarLeftDistanceInInches(5));
 }
 
 
