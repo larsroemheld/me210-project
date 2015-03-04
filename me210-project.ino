@@ -103,9 +103,9 @@ void loop() {  // loop() function required for Arduino
   if (TMRArd_IsTimerExpired(T_GAME)) {
     setMotorSpeed(0);
     arm.write(50); // Wiggle wiggle wiggle
-    delay(1000);
-    arm.write(160);
-    delay(1000);
+    delay(400);
+    arm.write(130);
+    delay(400);
     return;
   };
 
@@ -320,7 +320,7 @@ void dunkBalls() {
   
   // Move the arm up
   arm.write(20);
-  delay(435);
+  delay(455);
   
   // Wait to score points
   arm.write(90);
