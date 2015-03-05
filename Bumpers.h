@@ -15,7 +15,7 @@
 #include "Arduino.h"
 
 
-#define PIN_LEFT_BACKBUMPER   4
+#define PIN_LEFT_BACKBUMPER   10
 #define PIN_RIGHT_BACKBUMPER  11
 #define PIN_LEFT_FRONTBUMPER  12
 #define PIN_RIGHT_FRONTBUMPER 13

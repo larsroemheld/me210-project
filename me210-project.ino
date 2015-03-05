@@ -80,7 +80,7 @@ void setup() {  // setup() function required for Arduino
   Serial.begin(9600);
   Serial.println("Skip to my loop!");
   
-  arm.attach(3);
+  arm.attach(6);
 
   initBumpers();
   initMotors();
