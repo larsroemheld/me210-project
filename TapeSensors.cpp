@@ -12,6 +12,13 @@
 #include "TapeSensors.h"
 
 
+static unsigned int threshold_left_low = TAPE_SENSOR_THRESHOLD_LEFT - TAPE_SENSOR_HYSTERESIS_LEFT;
+static unsigned int threshold_left_high = TAPE_SENSOR_THRESHOLD_LEFT + TAPE_SENSOR_HYSTERESIS_LEFT;
+static unsigned int threshold_right_low = TAPE_SENSOR_THRESHOLD_RIGHT - TAPE_SENSOR_HYSTERESIS_RIGHT;
+static unsigned int threshold_right_high = TAPE_SENSOR_THRESHOLD_RIGHT + TAPE_SENSOR_HYSTERESIS_RIGHT;
+static unsigned int threshold_front_low = TAPE_SENSOR_THRESHOLD_FRONT - TAPE_SENSOR_HYSTERESIS_FRONT;
+static unsigned int threshold_front_high = TAPE_SENSOR_THRESHOLD_FRONT + TAPE_SENSOR_HYSTERESIS_FRONT;
+
 void initTapeSensors() {
 	pinMode(PIN_RIGHT_TAPESENSOR, INPUT);
 	pinMode(PIN_LEFT_TAPESENSOR, INPUT);
@@ -27,12 +34,11 @@ unsigned char isLeftSensorOnTape() {
 
 	sensorVal = analogRead(PIN_LEFT_TAPESENSOR);
 
-	// if (lastReadingOnTape) {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_LEFT - TAPE_SENSOR_HYSTERESIS_LEFT;
-	// } else {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_LEFT + TAPE_SENSOR_HYSTERESIS_LEFT;
-	// }
-	threshold = 90;
+	if (lastReadingOnTape) {
+		threshold = threshold_left_low;
+	} else {
+		threshold = threshold_left_high;
+	}
 	result = (sensorVal > threshold) ? true : false;
 
 	lastReadingVal = sensorVal;
@@ -49,12 +55,11 @@ unsigned char isRightSensorOnTape() {
 
 	sensorVal = analogRead(PIN_RIGHT_TAPESENSOR);
 
-	// if (lastReadingOnTape) {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_RIGHT - TAPE_SENSOR_HYSTERESIS_RIGHT;
-	// } else {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_RIGHT + TAPE_SENSOR_HYSTERESIS_RIGHT;
-	// }
-	threshold = 90;
+	if (lastReadingOnTape) {
+		threshold = threshold_right_low;
+	} else {
+		threshold = threshold_right_high;
+	}
 	result = (sensorVal > threshold) ? true : false;
 
 	lastReadingVal = sensorVal;
@@ -71,12 +76,11 @@ unsigned char isFrontSensorOnTape() {
 
 	sensorVal = analogRead(PIN_FRONT_TAPESENSOR);
 
-	// if (lastReadingOnTape) {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_FRONT - TAPE_SENSOR_HYSTERESIS_FRONT;
-	// } else {
-	// 	threshold = TAPE_SENSOR_THRESHOLD_FRONT + TAPE_SENSOR_HYSTERESIS_FRONT;
-	// }
-	threshold = 90;
+	if (lastReadingOnTape) {
+		threshold = threshold_front_low;
+	} else {
+		threshold = threshold_front_high;
+	}
 	result = (sensorVal > threshold) ? true : false;
 
 	lastReadingVal = sensorVal;

@@ -36,7 +36,6 @@ Servo arm;
 // Find line
 #define S_FL_FINDLINE       2
 #define S_FL_TURNONLINE     3
-#define S_GET_BALLS         4
 // Go Forward
 #define S_GF_FWD            5
 // Go Reverse
@@ -50,7 +49,7 @@ unsigned char state = S_START; // Global;
 
 /* Timers */
 #define T_DEBUG              0
-#define T_DEBUG_INTERVAL  15
+#define T_DEBUG_INTERVAL   1500
 #define T_GAME               1
 #define T_GAME_LENGTH     120000 // 120 Seconds = 2 minutes
 
@@ -73,10 +72,14 @@ unsigned char startArenaSide = SIDE_UNKNOWN;
 int temp_debug = true;
 static unsigned char lastTurn = NO_TURN;
 
+unsigned char thisIsEndgame = false;
+
 /*---------------- Module Function Prototypes ---------------*/
 
 /*---------------- Arduino Main Functions -------------------*/
 void setup() {  // setup() function required for Arduino
+  thisIsEndgame = (isAnyBackBumperPressed() || isAnyFrontBumperPressed()) ? true : false;
+
   Serial.begin(9600);
   Serial.println("Skip to my loop!");
   
@@ -91,19 +94,13 @@ void setup() {  // setup() function required for Arduino
   TMRArd_InitTimer(T_GAME, T_GAME_LENGTH);
 
   setMotorSpeed(0);
-  // TODO: read endgame switch, set flag to get only one ball
   setState(S_START);  
-  delay(2000);
 }
 
 void loop() {  // loop() function required for Arduino
   // Break after game
   if (TMRArd_IsTimerExpired(T_GAME)) {
-    setMotorSpeed(0);
-    arm.write(50); // Wiggle wiggle wiggle
-    delay(400);
-    arm.write(130);
-    delay(400);
+    dunkBalls(); // wiggle wiggle wiggle 
     return;
   };
 
@@ -140,14 +137,6 @@ void loop() {  // loop() function required for Arduino
 
       break;
     case S_FL_FINDLINE:
-      /* If we think we are in the left side (hence going towards the right) and end up half-way between center line 
-         and the right side, we were on the right side inititally (or we missed the line). In that case, reverse!   */
-      // NOTE: this is somewhat blocking code, keep in mind for debug!
-      // int curDistanceToFront;
-      // curDistanceToFront = getSonarFrontDistanceInInches(SONAR_LOOP_ACCURACY_PINGS);
-      // if (startArenaSide == SIDE_LEFT && curDistanceToFront >= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();
-      // if (startArenaSide == SIDE_RIGHT && curDistanceToFront <= HALF_FIELD_WIDTH * 3 / 2) reverseMotors();      
-
       left = isLeftSensorOnTape();
       right = isRightSensorOnTape();
 
@@ -173,15 +162,9 @@ void loop() {  // loop() function required for Arduino
           delay(135);
           setMotorSpeed(0);
           delay(1500);
-          setState(S_GET_BALLS);
+          setState(S_GR_RELOAD);
       }
       break;
-    case S_GET_BALLS:
-      while(!isAnyBackBumperPressed()) {
-        setLeftMotorSpeed(-220);
-        setRightMotorSpeed(-230);
-      }
-      setState(S_GR_RELOAD);
     case S_GF_FWD:
       lineFollowFWD();
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
@@ -201,9 +184,6 @@ void loop() {  // loop() function required for Arduino
 /*------------------ State Machine Functions -------------*/
 void setState (unsigned int newState) {
   state = newState;
-  // Serial.print("State change: ");
-  // Serial.println(newState);
-  signed int arenaTurnSign;
   
   switch (newState) {
     case S_START:
@@ -250,15 +230,11 @@ void setState (unsigned int newState) {
       setRightMotorSpeed(-215);
       break;
     case S_GR_RELOAD:
-    // TODO: RELOAD and GETBALLS are redundant, get rid of getballs again
-      requestBalls(3);
-      /**if(!isLeftSensorOnTape() && !isRightSensorOnTape()) {
-        while(!isFrontSensorOnTape()) {
-          setLeftMotorSpeed(-165);
-          setRightMotorSpeed(165);
-        }
+      if (thisIsEndgame) {
+        requestBalls(1);
+      } else {
+        requestBalls(3);
       }
-      delay(1000);*/
 
       setState(S_GF_FWD);
       break;
@@ -266,9 +242,6 @@ void setState (unsigned int newState) {
       dunkBalls();
       setState(S_GR_REV);
       break;
-    default: 
-      Serial.println("Invalid state requested: ");
-      Serial.println(newState);
   }
 }
 
@@ -334,10 +307,12 @@ void requestBalls(char numBalls) {
     setMotorSpeed(0);
     delay(150);
 
+    delay(5000);
+
     // Go forward onto line
     while (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
       setLeftMotorSpeed( 170);
-      setRightMotorSpeed(170);      
+      setRightMotorSpeed(170); 
     }
 
     // Break the forward movement
@@ -345,7 +320,9 @@ void requestBalls(char numBalls) {
     setRightMotorSpeed(-160);
     delay(100);
     setMotorSpeed(0);
-    delay(300);
+    delay(150);
+
+    delay(5000);
 
     // Turn towards center line
     while (!isFrontSensorOnTape()) {
@@ -356,9 +333,11 @@ void requestBalls(char numBalls) {
     // Break turning motion
     setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
     setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
-    delay(100);
+    delay(70);
     setMotorSpeed(0);
     delay(150);
+
+    delay(5000);
 
     // And off we go!
   }
@@ -449,7 +428,6 @@ void lineFollowREV() {
     //setRightMotorSpeed(-255);
   }
   delay(35);
-//  delay(50); // Debug: Does this actually work?
 }
 
 void timedDebug(void) {
@@ -458,7 +436,7 @@ void timedDebug(void) {
 
   TMRArd_InitTimer(T_DEBUG, T_DEBUG_INTERVAL);
 
-  Serial.println('----------------------------------------------');
+  Serial.println("----------------------------------------------");
   Serial.print(" time:");
   Serial.print(++Time);
   Serial.print(" state:");
