@@ -105,7 +105,7 @@ void loop() {  // loop() function required for Arduino
   };
 
 // Note: debugging via serial connection is blocking and breaks line following
-// if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
+//if (TMRArd_IsTimerExpired(T_DEBUG)) timedDebug();
 //  if(Serial.available() || temp_debug == true) {
 //    temp_debug = false;
 //    Serial.println("STOPPED");
@@ -307,8 +307,6 @@ void requestBalls(char numBalls) {
     setMotorSpeed(0);
     delay(150);
 
-    delay(5000);
-
     // Go forward onto line
     while (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
       setLeftMotorSpeed( 170);
@@ -322,8 +320,6 @@ void requestBalls(char numBalls) {
     setMotorSpeed(0);
     delay(150);
 
-    delay(5000);
-
     // Turn towards center line
     while (!isFrontSensorOnTape()) {
       setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);      
@@ -336,8 +332,6 @@ void requestBalls(char numBalls) {
     delay(70);
     setMotorSpeed(0);
     delay(150);
-
-    delay(5000);
 
     // And off we go!
   }
@@ -353,7 +347,7 @@ void dunkBalls() {
   
   // Move the arm up
   arm.write(20);
-  delay(455);
+  delay(475);
   
   // Wait to score points
   arm.write(90);
@@ -368,45 +362,19 @@ void dunkBalls() {
 
 void lineFollowFWD() {
   int left, right;
-  //static int last_state = 0;
 
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
-  //forward = isFrontSensorOnTape();
-  
-  /*if (getSonarFrontDistanceInInches(1) < 3) { //Close to wall
-    if (left && right) {
-      setLeftMotorSpeed(150);
-      setRightMotorSpeed(165);
-    }
-    else if (!left && !right) {
-      //Do nothing
-    } else if (!left) {
-      setLeftMotorSpeed(200);
-      setRightMotorSpeed(150);
-      lastTurn = TURN_RIGHT;
-      //last_state = 3;
-    } else if (!right) {
-      setLeftMotorSpeed(150);
-      setRightMotorSpeed(200);
-      lastTurn = TURN_LEFT;
-      //last_state = 4;
-    }*/
   if (left && right) {
       setLeftMotorSpeed(210);
-      setRightMotorSpeed(205);
-      //last_state = 1;
+      setRightMotorSpeed(210);
   } else if (!left && !right) {
   } else if (!left) {
     //setLeftMotorSpeed(255);
     setRightMotorSpeed(155);
-    //lastTurn = TURN_RIGHT;
-    //last_state = 3;
   } else if (!right) {
     setLeftMotorSpeed(155);
     //setRightMotorSpeed(255);
-    //lastTurn = TURN_LEFT;
-    //last_state = 4;
   }
   delay(35);
 }
