@@ -100,7 +100,7 @@ void setup() {  // setup() function required for Arduino
 void loop() {  // loop() function required for Arduino
   // Break after game
   if (TMRArd_IsTimerExpired(T_GAME)) {
-    dunkBalls(); // wiggle wiggle wiggle 
+    //dunkBalls(); // wiggle wiggle wiggle 
     return;
   };
 
@@ -165,7 +165,7 @@ void loop() {  // loop() function required for Arduino
           setState(S_GR_RELOAD);
       }
       break;
-    case S_GF_FWD:
+    case S_GF_FWD:  
       lineFollowFWD();
       if (isAnyFrontBumperPressed()) setState(S_DUNK);
       break;
@@ -208,7 +208,7 @@ void setState (unsigned int newState) {
         setRightMotorSpeed(255);
         delay(20);
         // And then these are the real values
-        setLeftMotorSpeed( 170);
+        setLeftMotorSpeed( 160);
         setRightMotorSpeed(170);
       } 
       break;
@@ -235,11 +235,18 @@ void setState (unsigned int newState) {
       } else {
         requestBalls(3);
       }
+      
+      delay(1000);
+      setLeftMotorSpeed(220);
+      setRightMotorSpeed(235);
+      delayMicroseconds(10000);
 
       setState(S_GF_FWD);
       break;
     case S_DUNK:
       dunkBalls();
+      setMotorSpeed(-230);
+      delay(1);
       setState(S_GR_REV);
       break;
   }
@@ -271,10 +278,10 @@ void requestBalls(char numBalls) {
     // Release the bumper
     while (isAnyBackBumperPressed()) {
       //lineFollowFWD();
-      setLeftMotorSpeed(223);
+      setLeftMotorSpeed(230);
       setRightMotorSpeed(230);
     }
-    delay(150);
+    delay(100);
 
     // Wait for ball
     setMotorSpeed(0);
@@ -282,56 +289,64 @@ void requestBalls(char numBalls) {
   }
 
   // Realign the bot to the line
-  if (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
+  if (!isLeftSensorOnTape() && !isRightSensorOnTape() && !isFrontSensorOnTape()) {
     // Align bot to wall again
+    /*
     while (!isAnyBackBumperPressed()) {
       setLeftMotorSpeed(-215);
       setRightMotorSpeed(-205);
     }
     setMotorSpeed(0);
+    delay(1000);
+    */
 
     int curDistanceToLeft, curArenaSide;
     curDistanceToLeft = getSonarLeftDistanceInInches(SONAR_START_ACCURACY_PINGS);
-    curArenaSide = (curDistanceToLeft < HALF_FIELD_WIDTH) ? SIDE_LEFT : SIDE_RIGHT;
+    curArenaSide = (curDistanceToLeft < 19.5) ? SIDE_LEFT : SIDE_RIGHT;
 
     // Turn towards center line
     while (!isFrontSensorOnTape()) {
-      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);      
-      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);
+      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 180 : -190);      
+      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -180 : 190);
     }
+    delay(50);
 
     // Break turning motion
     setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
     setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
-    delay(70);
+    delay(100);
     setMotorSpeed(0);
     delay(150);
 
     // Go forward onto line
     while (!isLeftSensorOnTape() && !isRightSensorOnTape()) {
-      setLeftMotorSpeed( 170);
-      setRightMotorSpeed(170); 
+      setLeftMotorSpeed( 180);
+      setRightMotorSpeed(180); 
     }
 
     // Break the forward movement
-    setLeftMotorSpeed(-160);
-    setRightMotorSpeed(-160);
+    setLeftMotorSpeed(-150);
+    setRightMotorSpeed(-150);
     delay(100);
     setMotorSpeed(0);
     delay(150);
-
-    // Turn towards center line
-    while (!isFrontSensorOnTape()) {
-      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);      
-      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);
+  
+    if (!isFrontSensorOnTape())
+    {
+      // Turn towards center line
+      while (!isFrontSensorOnTape()) {
+        setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);      
+        setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);
+      }
+      delay(80);
+  
+      // Break turning motion
+      setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 170 : -170);
+      setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -170 : 170);
+      delay(125);
+      setMotorSpeed(0);
+      delay(150);
     }
-
-    // Break turning motion
-    setLeftMotorSpeed((curArenaSide == SIDE_LEFT) ? 150 : -150);
-    setRightMotorSpeed((curArenaSide == SIDE_LEFT) ? -150 : 150);
-    delay(70);
-    setMotorSpeed(0);
-    delay(150);
 
     // And off we go!
   }
@@ -366,17 +381,17 @@ void lineFollowFWD() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-      setLeftMotorSpeed(210);
-      setRightMotorSpeed(210);
+      setLeftMotorSpeed(215);
+      setRightMotorSpeed(235);
   } else if (!left && !right) {
   } else if (!left) {
     //setLeftMotorSpeed(255);
-    setRightMotorSpeed(155);
+    setRightMotorSpeed(165);
   } else if (!right) {
-    setLeftMotorSpeed(155);
+    setLeftMotorSpeed(165);
     //setRightMotorSpeed(255);
   }
-  delay(35);
+  delay(30);
 }
 
 void lineFollowREV() {
@@ -385,8 +400,8 @@ void lineFollowREV() {
   left = isLeftSensorOnTape();
   right = isRightSensorOnTape();
   if (left && right) {
-    setLeftMotorSpeed(-218);
-    setRightMotorSpeed(-205);
+    setLeftMotorSpeed(-220);
+    setRightMotorSpeed(-235);
   } else if (!left && !right) { // do nothing
   } else if (!left) {
     //setLeftMotorSpeed(-255);
@@ -395,7 +410,7 @@ void lineFollowREV() {
     setLeftMotorSpeed(-165);
     //setRightMotorSpeed(-255);
   }
-  delay(35);
+  delay(25);
 }
 
 void timedDebug(void) {
